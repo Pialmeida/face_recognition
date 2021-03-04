@@ -14,6 +14,7 @@ import random
 import json
 
 from utils import *
+from camera import Camera
 
 with open('config.json','r') as f:
 	CONFIG = json.load(f)
@@ -56,6 +57,8 @@ class MainWindow(QWidget):
 				color: white;
 			}
 		'''
+
+
 
 		self.data = Data()
 

@@ -27,11 +27,18 @@ for i in range(number_files):
     globals()['image_{}'.format(i)] = face_recognition.load_image_file(list_of_files[i])
     print(i)
     globals()['image_encoding_{}'.format(i)] = face_recognition.face_encodings(globals()['image_{}'.format(i)])[0]
+
     known_face_encodings.append(globals()['image_encoding_{}'.format(i)])
 
     # Create array of known names
     names[i] = re.search('known_people\\\\(.*).jpg', names[i]).group(1)
     known_face_names.append(names[i])
+
+
+print('KNOWN FACE NAMES \n\n')
+print(known_face_names)
+print('KNOWN FACE ENCODINGS \n\n')
+print(known_face_encodings)
 
 
 print(names)
