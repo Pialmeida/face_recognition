@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 import sys, time, datetime, os
 import cv2, PIL
 import pandas as pd
+import numpy as np
 
 import sqlite3
 import random
@@ -14,7 +15,8 @@ import random
 import json
 
 from utils import *
-from camera import Camera
+from mylib.camera import Camera
+from mylib.thread import VideoGet
 
 with open('config.json','r') as f:
 	CONFIG = json.load(f)
@@ -23,17 +25,17 @@ class Thread(QThread):
 	changePixmap = pyqtSignal(QImage)
 
 	def run(self):
-		cap = cv2.VideoCapture(0)
+		cap = VideoGet().start()
+		self.cam = Camera()
 		while True:
-			ret, frame = cap.read()
-			if ret:
-				# https://stackoverflow.com/a/55468544/6622587
-				rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-				h, w, ch = rgbImage.shape
-				bytesPerLine = ch * w
-				convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
-				p = convertToQtFormat.scaled(int(CONFIG['UI']['UI_WIDTH']*0.491), int(CONFIG['UI']['UI_HEIGHT']), Qt.KeepAspectRatio)
-				self.changePixmap.emit(p)
+			_, frame = cap.read()
+			self.cam.recognize(frame)
+			rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+			h, w, ch = rgbImage.shape
+			bytesPerLine = ch * w
+			convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
+			p = convertToQtFormat.scaled(int(CONFIG['UI']['UI_WIDTH']*0.491), int(CONFIG['UI']['UI_HEIGHT']), Qt.KeepAspectRatio)
+			self.changePixmap.emit(p)
 
 class MainWindow(QWidget):
 	def __init__(self):

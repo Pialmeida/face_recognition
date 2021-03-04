@@ -64,6 +64,8 @@ while True:
         face_locations = face_recognition.face_locations(rgb_small_frame)
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
+        print(face_encodings)
+
         face_names = []
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
@@ -77,7 +79,14 @@ while True:
 
             # Or instead, use the known face with the smallest distance to the new face
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+            
+            print('\n\nFACE DISTANCE\n')
+            print(face_distances)
+
             best_match_index = np.argmin(face_distances)
+            print('Best MATCH INDEX \n\n')
+            print(best_match_index)     
+
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
 
