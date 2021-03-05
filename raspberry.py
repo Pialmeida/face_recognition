@@ -4,7 +4,10 @@ from PyQt5.QtCore import *
 
 from PyQt5.QtGui import *
 
-import sys, time, datetime, os
+import sys, time, os
+
+from datetime import datetime
+
 import cv2, PIL
 import pandas as pd
 import numpy as np
@@ -14,7 +17,7 @@ import random
 
 import json
 
-from utils import *
+from mylib.data import Data
 from mylib.camera import Camera
 from mylib.thread import VideoGet
 
@@ -23,19 +26,25 @@ with open('config.json','r') as f:
 
 class Thread(QThread):
 	changePixmap = pyqtSignal(QImage)
+	matchFound = pyqtSignal(list)
 
 	def run(self):
+		self.recognize = True
 		cap = VideoGet().start()
 		self.cam = Camera()
 		while True:
 			_, frame = cap.read()
-			self.cam.recognize(frame)
+			names = []
 			rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 			h, w, ch = rgbImage.shape
 			bytesPerLine = ch * w
 			convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
 			p = convertToQtFormat.scaled(int(CONFIG['UI']['UI_WIDTH']*0.491), int(CONFIG['UI']['UI_HEIGHT']), Qt.KeepAspectRatio)
 			self.changePixmap.emit(p)
+			if self.recognize == True:
+				names = self.cam.recognize(frame)
+				if len(names) != 0:
+					self.matchFound.emit(names)
 
 class MainWindow(QWidget):
 	def __init__(self):
@@ -45,6 +54,8 @@ class MainWindow(QWidget):
 		# self.top = 100
 		self.width = CONFIG['UI']['UI_WIDTH']
 		self.height = CONFIG['UI']['UI_HEIGHT']
+
+		self._PATH_TO_PICS = os.path.join(os.path.dirname(__file__),'known_people')
 
 		self._MAIN_WINDOW_LAYOUT = '''
 			background-color: #c5c6c7;
@@ -60,7 +71,12 @@ class MainWindow(QWidget):
 			}
 		'''
 
-
+		self._TEXT_LABEL_LAYOUT = '''
+			QLabel{
+				font: bold 14px;
+				color: white;
+			}
+		'''
 
 		self.data = Data()
 
@@ -70,7 +86,6 @@ class MainWindow(QWidget):
 		self.setStyleSheet(self._MAIN_WINDOW_LAYOUT)
 		self.setWindowTitle(self.title)
 		self.setFixedSize(self.width, self.height)
-
 
 		#Define Main Layout
 		self.layout = QHBoxLayout()
@@ -90,25 +105,37 @@ class MainWindow(QWidget):
 		self.label.resize(int(self.width*0.5), int(self.height*0.5))
 		self.label.setStyleSheet("QLabel { background-color : violet;}")
 
+
 		self.monitor = Thread(self)
 		self.monitor.setTerminationEnabled(True)
 		self.monitor.changePixmap.connect(self.setImage)
+		self.monitor.matchFound.connect(self.recordEntry)
 		self.monitor.start()
 
-		#Spacing
-		self.left_layout.addStretch(2)
+		self.timer = QTimer()
+		self.timer.timeout.connect(self.restartRecognize)
 
-		#Problema
-		self.label1 = QLabel()
-		self.left_layout.addWidget(self.label1, self.height*0.35)
-		self.label1.resize(int(self.width*0.5),int(self.height*0.2))
-		self.label1.move(int(self.width*0.05),int(self.height*0.8))
-		self.label1.setStyleSheet("QLabel { background-color : blue;}")
+
+		#Problem with logging in
+		self.label0 = QLabel()
+		self.left_layout.addWidget(self.label0, self.height*0.35)
+		self.label0.resize(int(self.width*0.5),int(self.height*0.2))
+		self.label0.move(int(self.width*0.05),int(self.height*0.8))
+		self.label0.setStyleSheet("QLabel { background-color : blue;}")
+
 
 		#Layout for Button
 		self.button_layout = QHBoxLayout()
-		self.label1.setLayout(self.button_layout)
+		self.label0.setLayout(self.button_layout)
 		self.button_layout.setContentsMargins(0,0,0,0)
+
+
+		#Warn User if miss identification
+		self.label1 = QLabel()
+		self.button_layout.addWidget(self.label1)
+		self.label1.setText('TRY ME LIL MAN')
+		self.label1.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+		self.label1.setStyleSheet("QLabel { background-color : brown;}")
 
 
 		#Reclamar de Problema
@@ -118,31 +145,34 @@ class MainWindow(QWidget):
 		self.button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 		self.button.setToolTip('Press to retry scan')
 		self.button.move(int(self.width*0.35), int(self.height*0.667))
-		self.button.resize(100, int(self.height*0.30))
+		self.button.resize(200, int(self.height*0.30))
 		self.button.clicked.connect(self.on_click1)
 		
+
 		#Right Labels
 		self.right_layout = QVBoxLayout()
 		self.layout.addLayout(self.right_layout)
 		self.left_layout.addSpacing(1)
 
-		#Image
+
+		#Image for Checking
 		self.label2 = QLabel(self)
+		self.label2.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
 		self.right_layout.addWidget(self.label2,int(self.height*0.4))
 		self.label2.resize(int(self.width*0.35), int(self.height*0.4))
 		self.label2.move(int(self.width*0.6),int(self.height*0.05))
-		self.label2.setStyleSheet("QLabel { background-color : orange;}")
-		self.label2.setText('IMAGE')
+
 
 		#Spacing
 		self.right_layout.addSpacing(4)
+
 
 		#Name
 		self.label3 = QLabel(self)
 		self.right_layout.addWidget(self.label3,int(self.height*0.06))
 		self.label3.resize(int(self.width*0.35), int(self.height*0.06))
 		self.label3.move(int(self.width*0.6),int(self.height*0.46))
-		self.label3.setStyleSheet("QLabel { background-color : red;}")
+		self.label3.setStyleSheet(self._TEXT_LABEL_LAYOUT)
 		self.label3.setText('NAME')
 
 		#Spacing
@@ -153,7 +183,7 @@ class MainWindow(QWidget):
 		self.right_layout.addWidget(self.label4, int(self.height*0.06))
 		self.label4.resize(int(self.width*0.35), int(self.height*0.06))
 		self.label4.move(int(self.width*0.6),int(self.height*0.54))
-		self.label4.setStyleSheet("QLabel { background-color : yellow;}")
+		self.label3.setStyleSheet(self._TEXT_LABEL_LAYOUT)
 		self.label4.setText('TIME')
 
 		#Spacing
@@ -180,34 +210,16 @@ class MainWindow(QWidget):
 
 		self.show()
 
+
 	def reset_style(self):
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
+
 
 	def on_click1(self):
 		self.reset_style()
 
 		print('Restart Scan')
 
-	def on_click2(self):
-		print('test')
-
-	def on_click3(self):
-		pass
-
-	def on_click4(self):
-		pass
-
-	def on_click5(self):
-		pass
-
-	def on_click6(self):
-		pass
-
-	def on_click7(self):
-		pass
-
-	def on_click8(self):
-		pass
 
 	def updateTable(self):
 		print('Updating table')
@@ -217,8 +229,36 @@ class MainWindow(QWidget):
 	def setImage(self, image):
 		self.label.setPixmap(QPixmap.fromImage(image))
 
+
+	@pyqtSlot(list)
+	def recordEntry(self, names):
+		self.monitor.recognize = False
+		print('STARTING TIMER')
+		self.timer.start(CONFIG['DETECTION']['INTERVAL']*1000)
+		if len(names) > 1:
+			self.label1.setText('ERRO: 2 PESSOAS DETECTADAS')
+		else:
+			#Add image for confirmation
+			path = os.path.join(self._PATH_TO_PICS,f'{names[0]}.jpg')
+			image = QPixmap(path).scaled(int(self.width*0.35), int(self.height*0.5), Qt.KeepAspectRatio)
+			self.label2.setPixmap(image)
+
+			#Add name for confirmation
+			self.label3.setText(names[0].upper())
+
+			#Add time of identification
+			time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+			self.data.updateEntry(names[0].upper())
+			self.label4.setText(time)
+
+
+	def restartRecognize(self):
+		print('ENDING TIMER')
+		self.monitor.recognize = True
+
 	def closeEvent(self, event):
 		self.monitor.terminate()
+		self.data.close()
 
 
 if __name__ == '__main__':

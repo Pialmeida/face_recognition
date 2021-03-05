@@ -29,7 +29,7 @@ class Camera():
 		#Resize and restructure frame to face_encodings format
 		rgb_small_frame = cv2.resize(frame, (0,0), fx=0.25, fy=0.25)[:, :, ::-1]
 
-		if not self.totalFrames % 2:
+		if not self.totalFrames % 5:
 			self.face_locations = face_recognition.face_locations(rgb_small_frame)
 			self.face_encodings = face_recognition.face_encodings(rgb_small_frame, self.face_locations)
 
@@ -40,14 +40,8 @@ class Camera():
 				name = 'Unknown'
 
 				face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
-				
-				print('\n\nFACE DISTANCE\n')
-				print(face_distances)
 
 				best_match_index = np.argmin(face_distances)
-
-				print('Best MATCH INDEX \n\n')
-				print(best_match_index)
 				if self.matches[best_match_index]:
 					name = self.known_face_names[best_match_index]
 				
@@ -55,10 +49,8 @@ class Camera():
 				self.face_names.append(name)
 
 		self.totalFrames += 1
-		print('face names')
-		print(self.face_names)
 
-
+		return self.face_names
 
 
 

@@ -1,4 +1,6 @@
-import cv2
+test = 'tests asd  as asd'
 
-cam=cv2.VideoCapture(0)
-cam.release()
+out = test.title()
+
+
+print(out)
