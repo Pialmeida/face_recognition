@@ -78,6 +78,8 @@ class MainWindow(QWidget):
 			}
 		'''
 
+		self.prev_name = None
+
 		self.data = Data()
 
 		self.setupUI()
@@ -234,22 +236,29 @@ class MainWindow(QWidget):
 	def recordEntry(self, names):
 		self.monitor.recognize = False
 		print('STARTING TIMER')
+
 		self.timer.start(CONFIG['DETECTION']['INTERVAL']*1000)
+
+
 		if len(names) > 1:
 			self.label1.setText('ERRO: 2 PESSOAS DETECTADAS')
 		else:
-			#Add image for confirmation
-			path = os.path.join(self._PATH_TO_PICS,f'{names[0]}.jpg')
-			image = QPixmap(path).scaled(int(self.width*0.35), int(self.height*0.5), Qt.KeepAspectRatio)
-			self.label2.setPixmap(image)
+			if self.prev_name is None or names[0] != self.prev_name:
+				self.prev_name = names[0]
+				#Add image for confirmation
+				path = os.path.join(self._PATH_TO_PICS,f'{names[0]}.jpg')
+				image = QPixmap(path).scaled(int(self.width*0.35), int(self.height*0.5), Qt.KeepAspectRatio)
+				self.label2.setPixmap(image)
 
-			#Add name for confirmation
-			self.label3.setText(names[0].upper())
+				#Add name for confirmation
+				self.label3.setText(names[0].upper())
 
-			#Add time of identification
-			time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-			self.data.updateEntry(names[0].upper())
-			self.label4.setText(time)
+				#Add time of identification
+				time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+				self.data.updateEntry(names[0].upper())
+				self.label4.setText(time)
+			else:
+				print('DOPE')
 
 
 	def restartRecognize(self):

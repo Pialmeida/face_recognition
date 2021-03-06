@@ -52,7 +52,7 @@ class Data():
 
 		elif IN1 is not None and OUT1 is None and IN2 is not None and OUT2 is not None:
 			print(f'{name} FINAL EXIT')
-			self.cursor.execute(f"UPDATE log SET SAIDA = '{time}', STATUS = 'OUT', 'SAIDA ALMOCO' = '{time}' WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND 'ENTRADA ALMOCO' IS NOT NULL AND 'SAIDA ALMOCO' IS NOT NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = '{time}', STATUS = 'OUT' WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND 'ENTRADA ALMOCO' IS NOT NULL AND 'SAIDA ALMOCO' IS NOT NULL")
 			self.conn.commit()
 		else:
 			print('NICE')
@@ -75,4 +75,4 @@ class Data():
 
 if __name__ == '__main__':
 	data = Data()
-	data.updateEntry('PEDRO ALMEIDA')
+	print(data.getDF())
