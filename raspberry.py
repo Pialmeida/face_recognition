@@ -231,6 +231,7 @@ class MainWindow(QWidget):
 
 
 	def on_click1(self):
+		print(self._prev_name)
 		self.data.removeLast(self._prev_name)
 
 
@@ -260,11 +261,13 @@ class MainWindow(QWidget):
 				#Start timer for recognition
 				self.timer2.start(CONFIG['DETECTION']['RESET_PREV']*1000)
 
+				self.prev_name = names[0]
 				self._prev_name = self.prev_name
 
-				self.prev_name = names[0]
+				
 				#Add image for confirmation
-				path = os.path.join(self._PATH_TO_PICS,f'{names[0]}.jpg')
+				path = os.path.join(self._PATH_TO_PICS,f'{names[0]}_1.jpg')
+				print(path)
 				image = QPixmap(path).scaled(int(self.width*0.35), int(self.height*0.5), Qt.KeepAspectRatio)
 				self.label2.setPixmap(image)
 

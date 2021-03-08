@@ -17,7 +17,7 @@ class Camera():
 		self.load_encodings()
 
 	def load_encodings(self):
-		self.known_face_names = [re.search(r'known_people\\(.*)\.jpg', x).group(1) for x in glob.glob(os.path.join(self._PATH,r'*.jpg'))]
+		self.known_face_names = [re.search(r'known_people\\(.*)\_\d\.jpg', x).group(1) for x in glob.glob(os.path.join(self._PATH,r'*.jpg'))]
 		self.known_face_encodings = [x[0] for x in [face_recognition.face_encodings(face_recognition.load_image_file(x)) for x in glob.glob(os.path.join(self._PATH,r'*.jpg'))]]
 		print('KNOWN FACE NAMES \n\n')
 		print(self.known_face_names)

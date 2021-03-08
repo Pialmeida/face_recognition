@@ -67,9 +67,7 @@ class Data():
 		# 	print('testing')
 
 		if IN1 is not None and OUT1 is not None and IN2 is not None and OUT2 is not None: #ALL Entries
-			print(IN1, OUT1, IN2, OUT2)
-			print('testing 2')
-			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', 'HORAS TRABALHADAS' = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND 'ENTRADA ALMOCO' IS NOT NULL AND 'SAIDA ALMOCO' IS NOT NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', 'HORAS TRABALHADAS' = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NOT NULL AND 'ENTRADA ALMOCO' IS NOT NULL AND 'SAIDA ALMOCO' IS NOT NULL")
 			self.conn.commit()
 		elif IN1 is not None and OUT1 is None and IN2 is not None and OUT2 is not None: #Missing last
 			self.cursor.execute(f"UPDATE log SET SAIDA = '{IN2}', STATUS = 'OUT', 'HORAS TRABALHADAS' = '{str(self.timeDelta(IN1,IN2))}', 'ENTRADA ALMOCO' = NULL, 'SAIDA ALMOCO' = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND 'ENTRADA ALMOCO' IS NOT NULL AND 'SAIDA ALMOCO' IS NOT NULL")
