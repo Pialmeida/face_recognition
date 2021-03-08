@@ -34,12 +34,11 @@ class VideoGet():
 				self.stop()
 			else:
 				if self.queue.full(): #If queue is full, wait and try again
-					print('waiting')
 					time.sleep(0.1)
 				else:
 					#Debugging
-					print(self.counter)
-					self.counter += 1
+					# print(self.counter)
+					# self.counter += 1
 
 					#Read frame and add it to queue
 					(self.grabbed, self.frame) = self.stream.read()

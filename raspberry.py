@@ -55,6 +55,8 @@ class MainWindow(QWidget):
 		self.width = CONFIG['UI']['UI_WIDTH']
 		self.height = CONFIG['UI']['UI_HEIGHT']
 
+		self._PATH_TO_LOGO = os.path.join(os.path.dirname(__file__),'logoAKAER.jpg')
+
 		self._PATH_TO_PICS = os.path.join(os.path.dirname(__file__),'known_people')
 
 		self._MAIN_WINDOW_LAYOUT = '''
@@ -77,6 +79,8 @@ class MainWindow(QWidget):
 				color: white;
 			}
 		'''
+
+		self._timer_counter = 0
 
 		self.prev_name = None
 
@@ -114,8 +118,17 @@ class MainWindow(QWidget):
 		self.monitor.matchFound.connect(self.recordEntry)
 		self.monitor.start()
 
+		#Timer for Detection
 		self.timer = QTimer()
 		self.timer.timeout.connect(self.restartRecognize)
+
+		#Timer for Re-Detection
+		self.timer2 = QTimer()
+		self.timer2.timeout.connect(self.resetPrevName)
+
+		#Timer for confirmation
+		self.timer3 = QTimer()
+		#selt.timer3.timeout.connect()
 
 
 		#Problem with logging in
@@ -129,14 +142,14 @@ class MainWindow(QWidget):
 		#Layout for Button
 		self.button_layout = QHBoxLayout()
 		self.label0.setLayout(self.button_layout)
+		self.label0.setText('TESTING')
 		self.button_layout.setContentsMargins(0,0,0,0)
 
 
-		#Warn User if miss identification
+		# #Warn User if miss identification
 		self.label1 = QLabel()
 		self.button_layout.addWidget(self.label1)
-		self.label1.setText('TRY ME LIL MAN')
-		self.label1.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+
 		self.label1.setStyleSheet("QLabel { background-color : brown;}")
 
 
@@ -144,9 +157,9 @@ class MainWindow(QWidget):
 		self.button = QPushButton('NOT YOU?', self)
 		self.button_layout.addWidget(self.button, alignment=Qt.AlignRight)
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
-		self.button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+		self.button.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Expanding)
 		self.button.setToolTip('Press to retry scan')
-		self.button.move(int(self.width*0.35), int(self.height*0.667))
+		self.button.move(int(self.width*0.50), int(self.height*0.667))
 		self.button.resize(200, int(self.height*0.30))
 		self.button.clicked.connect(self.on_click1)
 		
@@ -185,7 +198,7 @@ class MainWindow(QWidget):
 		self.right_layout.addWidget(self.label4, int(self.height*0.06))
 		self.label4.resize(int(self.width*0.35), int(self.height*0.06))
 		self.label4.move(int(self.width*0.6),int(self.height*0.54))
-		self.label3.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT)
 		self.label4.setText('TIME')
 
 		#Spacing
@@ -196,7 +209,7 @@ class MainWindow(QWidget):
 		self.right_layout.addWidget(self.label5, int(self.height*0.06))
 		self.label5.resize(int(self.width*0.35), int(self.height*0.06))
 		self.label5.move(int(self.width*0.6),int(self.height*0.54))
-		self.label5.setStyleSheet("QLabel { background-color : purple;}")
+		self.label5.setStyleSheet(self._TEXT_LABEL_LAYOUT)
 		self.label5.setText('STATUS')
 
 		#Spacing
@@ -207,8 +220,8 @@ class MainWindow(QWidget):
 		self.right_layout.addWidget(self.label6, int(self.height*0.2))
 		self.label6.resize(int(self.width*0.35), int(self.height*0.2))
 		self.label6.move(int(self.width*0.6),int(self.height*0.54))
-		self.label6.setStyleSheet("QLabel { background-color : gray;}")
-		self.label6.setText('LOGO')
+
+		self.label6.setPixmap(QPixmap(self._PATH_TO_LOGO).scaled(int(self.width*0.4), int(self.height*0.2), Qt.KeepAspectRatio))
 
 		self.show()
 
@@ -218,9 +231,7 @@ class MainWindow(QWidget):
 
 
 	def on_click1(self):
-		self.reset_style()
-
-		print('Restart Scan')
+		self.data.removeLast(self._prev_name)
 
 
 	def updateTable(self):
@@ -242,8 +253,15 @@ class MainWindow(QWidget):
 
 		if len(names) > 1:
 			self.label1.setText('ERRO: 2 PESSOAS DETECTADAS')
+		elif 'Unknown' in names:
+			print('Unknown Person Identified')
 		else:
 			if self.prev_name is None or names[0] != self.prev_name:
+				#Start timer for recognition
+				self.timer2.start(CONFIG['DETECTION']['RESET_PREV']*1000)
+
+				self._prev_name = self.prev_name
+
 				self.prev_name = names[0]
 				#Add image for confirmation
 				path = os.path.join(self._PATH_TO_PICS,f'{names[0]}.jpg')
@@ -254,9 +272,9 @@ class MainWindow(QWidget):
 				self.label3.setText(names[0].upper())
 
 				#Add time of identification
-				time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-				self.data.updateEntry(names[0].upper())
-				self.label4.setText(time)
+				time = datetime.now()
+				self.label4.setText(time.strftime("%m/%d/%Y, %H:%M:%S"))
+				self.label5.setText(self.data.addEntry(names[0].upper(), time))
 			else:
 				print('DOPE')
 
@@ -264,6 +282,10 @@ class MainWindow(QWidget):
 	def restartRecognize(self):
 		print('ENDING TIMER')
 		self.monitor.recognize = True
+
+	def resetPrevName(self):
+		print('PREV NAME RESET')
+		self.prev_name = None
 
 	def closeEvent(self, event):
 		self.monitor.terminate()
