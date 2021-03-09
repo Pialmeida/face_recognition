@@ -35,23 +35,23 @@ class Data():
 
 		elif IN1 is not None and OUT1 is None and IN2 is None and OUT2 is None:
 			print(f'{name} NOW OUT')
-			self.cursor.execute(f"UPDATE log SET SAIDA = '{time}', STATUS = 'OUT', 'HORAS TRABALHADAS' = '{str(self.timeDelta(IN1,time))}' WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = '{time}', STATUS = 'OUT', [HORAS TRABALHADAS] = '{str(self.timeDelta(IN1,time))}' WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL")
 			self.conn.commit()
 			return 'SAIDA'
 
 		elif IN1 is not None and OUT1 is not None and IN2 is None and OUT2 is None:
 			print(f'{name} NOW LUNCH')
-			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', 'ENTRADA ALMOCO' = '{OUT1}' , 'SAIDA ALMOCO' = '{time}', 'HORAS TRABALHADAS' = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NOT NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', [ENTRADA ALMOCO] = '{OUT1}' , [SAIDA ALMOCO] = '{time}', [HORAS TRABALHADAS] = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NOT NULL")
 			self.conn.commit()
 			return 'ENTRADA'
 
 		elif IN1 is not None and OUT1 is None and IN2 is not None and OUT2 is not None:
 			print(f'{name} FINAL EXIT')
-			self.cursor.execute(f"UPDATE log SET SAIDA = '{time}', STATUS = 'OUT', 'HORAS TRABALHADAS' = '{str(self.timeDelta(IN1,time)-self.timeDelta(IN2,OUT2))}' WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND 'ENTRADA ALMOCO' IS NOT NULL AND 'SAIDA ALMOCO' IS NOT NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = '{time}', STATUS = 'OUT', [HORAS TRABALHADAS] = '{str(self.timeDelta(IN1,time)-self.timeDelta(IN2,OUT2))}' WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND [ENTRADA ALMOCO] IS NOT NULL AND [SAIDA ALMOCO] IS NOT NULL")
 			self.conn.commit()
 			return 'SAIDA'
 		else:
-			print('NICE')
+			return 'REGISTRO COMPLETO'
 	
 	def removeLast(self, name, now=datetime.now()):
 		today = now.strftime("%d/%m/%Y")
@@ -67,13 +67,13 @@ class Data():
 		# 	print('testing')
 
 		if IN1 is not None and OUT1 is not None and IN2 is not None and OUT2 is not None: #ALL Entries
-			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', 'HORAS TRABALHADAS' = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NOT NULL AND 'ENTRADA ALMOCO' IS NOT NULL AND 'SAIDA ALMOCO' IS NOT NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', [HORAS TRABALHADAS] = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NOT NULL AND [ENTRADA ALMOCO] IS NOT NULL AND [SAIDA ALMOCO] IS NOT NULL")
 			self.conn.commit()
 		elif IN1 is not None and OUT1 is None and IN2 is not None and OUT2 is not None: #Missing last
-			self.cursor.execute(f"UPDATE log SET SAIDA = '{IN2}', STATUS = 'OUT', 'HORAS TRABALHADAS' = '{str(self.timeDelta(IN1,IN2))}', 'ENTRADA ALMOCO' = NULL, 'SAIDA ALMOCO' = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND 'ENTRADA ALMOCO' IS NOT NULL AND 'SAIDA ALMOCO' IS NOT NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = '{IN2}', STATUS = 'OUT', [HORAS TRABALHADAS] = '{str(self.timeDelta(IN1,IN2))}', [ENTRADA ALMOCO] = NULL, [SAIDA ALMOCO] = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND [ENTRADA ALMOCO] IS NOT NULL AND [SAIDA ALMOCO] IS NOT NULL")
 			self.conn.commit()
 		elif IN1 is not None and OUT1 is not None and IN2 is None and OUT2 is None:
-			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', 'HORAS TRABALHADAS' = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NOT NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', [HORAS TRABALHADAS] = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NOT NULL")
 			self.conn.commit()
 		elif IN1 is not None and OUT1 is None and IN2 is None and OUT2 is None:
 			self.cursor.execute(f"DELETE FROM log WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL")
@@ -90,6 +90,18 @@ class Data():
 
 		return (date2-date1)
 
+	def getMissing(self,date):
+		#date.strftime('%d/%m/%Y')
+		for index, row in pd.read_sql_query(f"SELECT * FROM log WHERE STATUS = 'IN' AND DIA = '{date}'", self.conn).iterrows():
+			print(row['NOME'])
+
+	def addLunchTime(self,date):
+		self.cursor.execute(f"UPDATE log SET [ENTRADA ALMOCO] = '{self._LUNCH_START}', [SAIDA ALMOCO] = '{self._LUNCH_END}', [HORAS TRABALHADAS] = TIME((strftime('%s', [SAIDA]) - strftime('%s', [ENTRADA]))-(strftime('%s', '{self._LUNCH_END}') - strftime('%s', '{self._LUNCH_START}')),'unixepoch') WHERE DIA = '{date}' AND [ENTRADA ALMOCO] IS NULL AND [SAIDA ALMOCO] IS NULL")
+		self.conn.commit()
+
+	def endDay(self):
+		return str(self.timeDelta(self._DAY_END, self._DAY_START) - self.timeDelta(self._LUNCH_START, self._LUNCH_END))
+
 	def changeStatus(name, today, status):
 		pass
 
@@ -102,4 +114,4 @@ class Data():
 
 if __name__ == '__main__':
 	data = Data()
-	print(data.getDF())
+	data.addLunchTime('09/03/2021')

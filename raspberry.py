@@ -30,16 +30,16 @@ class Thread(QThread):
 
 	def run(self):
 		self.recognize = True
-		cap = VideoGet().start()
+		self.cap = VideoGet().start()
 		self.cam = Camera()
 		while True:
-			_, frame = cap.read()
+			_, frame = self.cap.read()
 			names = []
 			rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 			h, w, ch = rgbImage.shape
 			bytesPerLine = ch * w
 			convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
-			p = convertToQtFormat.scaled(int(CONFIG['UI']['UI_WIDTH']*0.491), int(CONFIG['UI']['UI_HEIGHT']), Qt.KeepAspectRatio)
+			p = convertToQtFormat.scaled(int(CONFIG['UI']['UI_WIDTH']), int(CONFIG['UI']['UI_HEIGHT']*0.8), Qt.KeepAspectRatio)
 			self.changePixmap.emit(p)
 			if self.recognize == True:
 				names = self.cam.recognize(frame)
@@ -71,16 +71,25 @@ class MainWindow(QWidget):
 				font: bold 14px;
 				color: white;
 			}
-		'''
-
-		self._TEXT_LABEL_LAYOUT = '''
-			QLabel{
+			QPushButton::Pressed{
+				background-color: #a3023a;
+				border-style: outset;
+				border: 2px solid black;
 				font: bold 14px;
 				color: white;
 			}
 		'''
 
+		self._TEXT_LABEL_LAYOUT = '''
+			QLabel{
+				font: bold 14px;
+				color: black;
+			}
+		'''
+
 		self._timer_counter = 0
+
+		self.now = datetime.now()
 
 		self.prev_name = None
 
@@ -126,42 +135,35 @@ class MainWindow(QWidget):
 		self.timer2 = QTimer()
 		self.timer2.timeout.connect(self.resetPrevName)
 
-		#Timer for confirmation
+		#Timer for email
 		self.timer3 = QTimer()
-		#selt.timer3.timeout.connect()
+		self.timer3.timeout.connect(self.alertUser)
 
 
 		#Problem with logging in
-		self.label0 = QLabel()
-		self.left_layout.addWidget(self.label0, self.height*0.35)
-		self.label0.resize(int(self.width*0.5),int(self.height*0.2))
-		self.label0.move(int(self.width*0.05),int(self.height*0.8))
-		self.label0.setStyleSheet("QLabel { background-color : blue;}")
+		self.label1 = QLabel()
+		self.left_layout.addWidget(self.label1, self.height*0.35)
+		self.label1.resize(int(self.width*0.5),int(self.height*0.2))
+		self.label1.move(int(self.width*0.05),int(self.height*0.8))
+		self.label1.setStyleSheet("QLabel { background-color : blue;}")
 
 
 		#Layout for Button
 		self.button_layout = QHBoxLayout()
-		self.label0.setLayout(self.button_layout)
-		self.label0.setText('TESTING')
+		self.label1.setLayout(self.button_layout)
 		self.button_layout.setContentsMargins(0,0,0,0)
-
-
-		# #Warn User if miss identification
-		self.label1 = QLabel()
-		self.button_layout.addWidget(self.label1)
-
-		self.label1.setStyleSheet("QLabel { background-color : brown;}")
 
 
 		#Reclamar de Problema
 		self.button = QPushButton('NOT YOU?', self)
-		self.button_layout.addWidget(self.button, alignment=Qt.AlignRight)
+		self.button_layout.addWidget(self.button)
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
-		self.button.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Expanding)
+		self.button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.button.setToolTip('Press to retry scan')
 		self.button.move(int(self.width*0.50), int(self.height*0.667))
-		self.button.resize(200, int(self.height*0.30))
+		self.button.setGeometry(10,10, 1000, int(self.height*0.30))
 		self.button.clicked.connect(self.on_click1)
+
 		
 
 		#Right Labels
@@ -215,11 +217,12 @@ class MainWindow(QWidget):
 		#Spacing
 		self.right_layout.addSpacing(4)
 
-		#Entry
+		#Business Stuff
 		self.label6 = QLabel(self)
 		self.right_layout.addWidget(self.label6, int(self.height*0.2))
 		self.label6.resize(int(self.width*0.35), int(self.height*0.2))
 		self.label6.move(int(self.width*0.6),int(self.height*0.54))
+		self.label6.setAlignment(Qt.AlignHCenter  | Qt.AlignBottom)
 
 		self.label6.setPixmap(QPixmap(self._PATH_TO_LOGO).scaled(int(self.width*0.4), int(self.height*0.2), Qt.KeepAspectRatio))
 
@@ -231,13 +234,13 @@ class MainWindow(QWidget):
 
 
 	def on_click1(self):
-		print(self._prev_name)
 		self.data.removeLast(self._prev_name)
+		self.button.setText('NOT YOU?')
 
-
-	def updateTable(self):
-		print('Updating table')
-
+	def alertUser(self):
+		if datetime.now().day != self.now.day:
+			self.data.endDay()
+		
 
 	@pyqtSlot(QImage)
 	def setImage(self, image):
@@ -278,9 +281,10 @@ class MainWindow(QWidget):
 				time = datetime.now()
 				self.label4.setText(time.strftime("%m/%d/%Y, %H:%M:%S"))
 				self.label5.setText(self.data.addEntry(names[0].upper(), time))
-			else:
-				print('DOPE')
 
+				self.button.setText(f'NOT {names[0].upper()}?')
+			else:
+				print('PASSED')
 
 	def restartRecognize(self):
 		print('ENDING TIMER')
@@ -288,9 +292,10 @@ class MainWindow(QWidget):
 
 	def resetPrevName(self):
 		print('PREV NAME RESET')
+		self.button.setText('NOT YOU?')
 		self.prev_name = None
 
-	def closeEvent(self, event):
+	def closeEvent(self, closeEvent):
 		self.monitor.terminate()
 		self.data.close()
 
