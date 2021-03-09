@@ -8,9 +8,10 @@
 	- ~~Add sidebar display with user details once recognized~~
 	- ~~Add prevention to double registers of the same name~~
 	- ~~Add calculation of hours worked at end of the day~~
-	- Create auto-sender for individuals missing entries
+	- Add auto-sender for individuals missing entries
 - Create front-end UI for Computer Access
 	- Add registering functionality
 	- Add removal functionality
 	- Add auto-save functinality
 	- Add name-lookup functionality
+	- Add database to cloud storage
