@@ -8,7 +8,7 @@ import sys, time, os
 
 from datetime import datetime
 
-import cv2, PIL
+import cv2
 import pandas as pd
 import numpy as np
 
@@ -16,6 +16,8 @@ import sqlite3
 import random
 
 import json
+
+import Rpi.GPIO as GPIO
 
 from mylib.data import Data
 from mylib.camera import Camera
@@ -50,8 +52,6 @@ class MainWindow(QWidget):
 	def __init__(self):
 		super(MainWindow,self).__init__()
 		self.title = 'Iris Biometric Detection'
-		# self.left = 100
-		# self.top = 100
 		self.width = CONFIG['UI']['UI_WIDTH']
 		self.height = CONFIG['UI']['UI_HEIGHT']
 
@@ -86,6 +86,8 @@ class MainWindow(QWidget):
 				color: black;
 			}
 		'''
+
+		self.setupSensor()
 
 		self._timer_counter = 0
 
@@ -138,6 +140,12 @@ class MainWindow(QWidget):
 		#Timer for email
 		self.timer3 = QTimer()
 		self.timer3.timeout.connect(self.alertUser)
+
+
+		#Timer for Sensor Reading
+		self.timer4 = QTimer()
+		self.timer4.timeout.connect(self.readSensor)
+		self.timer4.start(CONFIG['SENSOR']['INTERVAL']*1000)
 
 
 		#Problem with logging in
@@ -228,9 +236,14 @@ class MainWindow(QWidget):
 
 		self.show()
 
+	def setupSensor(self):
+		GPIO.setmode(GPIO.BCM)
 
-	def reset_style(self):
-		self.button.setStyleSheet(self._BUTTON_LAYOUT)
+		self.GPIO_TRIGGER = CONFIG['SENSOR']['GPIO_TRIGGER']
+		self.GPIO_ECHO = CONFIG['SENSOR']['GPIO_TRIGGER']
+
+		GPIO.setup(self.GPIO_TRIGGER, GPIO.OUT)
+		GPIO.setup(self.GPIO_ECHO, GPIO.IN)
 
 
 	def on_click1(self):
@@ -240,6 +253,25 @@ class MainWindow(QWidget):
 	def alertUser(self):
 		if datetime.now().day != self.now.day:
 			self.data.endDay()
+	
+	def readSensor(self):
+		GPIO.output(self.GPIO_TRIGGER, True)
+
+		time.sleep(0.00001)
+
+		GPIO.output(self.GPIO_TRIGGER, False)
+
+		while GPIO.input(self.GPIO_ECHO) == 0:
+			START_TIME = time.time()
+
+		while GPIO.input(self.GPIO_ECHO) == 1:
+			STOP_TIME = time.time()
+
+		distance = ((STOP_TIME-START_TIME) * 34300) / 2
+
+		print(f'Distance in cm: {distance}')
+
+		self.timer4.start(CONFIG['SENSOR']['INTERVAL']*1000)
 		
 
 	@pyqtSlot(QImage)

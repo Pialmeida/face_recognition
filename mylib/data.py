@@ -12,10 +12,10 @@ class Data():
 
 		with open(self._PATH_TO_CONFIG,'r') as f:
 			CONFIG = json.load(f)
-			self._DAY_START = CONFIG['hours']['DAY_START']
-			self._DAY_END = CONFIG['hours']['DAY_END']
-			self._LUNCH_START = CONFIG['hours']['LUNCH_START']
-			self._LUNCH_END = CONFIG['hours']['LUNCH_END']
+			self._DAY_START = CONFIG['HOURS']['DAY_START']
+			self._DAY_END = CONFIG['HOURS']['DAY_END']
+			self._LUNCH_START = CONFIG['HOURS']['LUNCH_START']
+			self._LUNCH_END = CONFIG['HOURS']['LUNCH_END']
 
 	def addEntry(self, name, now=datetime.now()):
 		today = now.strftime("%d/%m/%Y")
