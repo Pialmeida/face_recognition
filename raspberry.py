@@ -13,11 +13,12 @@ import pandas as pd
 import numpy as np
 
 import sqlite3
-import random
 
 import json
 
-import Rpi.GPIO as GPIO
+from playsound import playsound
+
+#import RPi.GPIO as GPIO
 
 from mylib.data import Data
 from mylib.camera import Camera
@@ -59,6 +60,10 @@ class MainWindow(QWidget):
 
 		self._PATH_TO_PICS = os.path.join(os.path.dirname(__file__),'known_people')
 
+		self._PATH_TO_CONFIRMATION_MP3 = os.path.join(os.path.dirname(__file__),'audio','confirmation.mp3')
+
+		self._PATH_TO_ERROR_MP3 = os.path.join(os.path.dirname(__file__),'audio','error.mp3')
+
 		self._MAIN_WINDOW_LAYOUT = '''
 			background-color: #c5c6c7;
 		'''
@@ -87,7 +92,7 @@ class MainWindow(QWidget):
 			}
 		'''
 
-		self.setupSensor()
+		#self.setupSensor()
 
 		self._timer_counter = 0
 
@@ -143,9 +148,9 @@ class MainWindow(QWidget):
 
 
 		#Timer for Sensor Reading
-		self.timer4 = QTimer()
-		self.timer4.timeout.connect(self.readSensor)
-		self.timer4.start(CONFIG['SENSOR']['INTERVAL']*1000)
+		# self.timer4 = QTimer()
+		# self.timer4.timeout.connect(self.readSensor)
+		# self.timer4.start(CONFIG['SENSOR']['INTERVAL']*1000)
 
 
 		#Problem with logging in
@@ -232,18 +237,37 @@ class MainWindow(QWidget):
 		self.label6.move(int(self.width*0.6),int(self.height*0.54))
 		self.label6.setAlignment(Qt.AlignHCenter  | Qt.AlignBottom)
 
-		self.label6.setPixmap(QPixmap(self._PATH_TO_LOGO).scaled(int(self.width*0.4), int(self.height*0.2), Qt.KeepAspectRatio))
+		self.label6.setPixmap(QPixmap(self._PATH_TO_LOGO).scaled(int(self.width*0.45), int(self.height*0.3), Qt.KeepAspectRatio))
 
 		self.show()
 
-	def setupSensor(self):
-		GPIO.setmode(GPIO.BCM)
+	# def setupSensor(self):
+	# 	GPIO.setmode(GPIO.BCM)
 
-		self.GPIO_TRIGGER = CONFIG['SENSOR']['GPIO_TRIGGER']
-		self.GPIO_ECHO = CONFIG['SENSOR']['GPIO_TRIGGER']
+	# 	self.GPIO_TRIGGER = CONFIG['SENSOR']['GPIO_TRIGGER']
+	# 	self.GPIO_ECHO = CONFIG['SENSOR']['GPIO_TRIGGER']
 
-		GPIO.setup(self.GPIO_TRIGGER, GPIO.OUT)
-		GPIO.setup(self.GPIO_ECHO, GPIO.IN)
+	# 	GPIO.setup(self.GPIO_TRIGGER, GPIO.OUT)
+	# 	GPIO.setup(self.GPIO_ECHO, GPIO.IN)
+
+	# def readSensor(self):
+	# 	GPIO.output(self.GPIO_TRIGGER, True)
+
+	# 	time.sleep(0.00001)
+
+	# 	GPIO.output(self.GPIO_TRIGGER, False)
+
+	# 	while GPIO.input(self.GPIO_ECHO) == 0:
+	# 		START_TIME = time.time()
+
+	# 	while GPIO.input(self.GPIO_ECHO) == 1:
+	# 		STOP_TIME = time.time()
+
+	# 	distance = ((STOP_TIME-START_TIME) * 34300) / 2
+
+	# 	print(f'Distance in cm: {distance}')
+
+	# 	self.timer4.start(CONFIG['SENSOR']['INTERVAL']*1000)
 
 
 	def on_click1(self):
@@ -254,25 +278,8 @@ class MainWindow(QWidget):
 		if datetime.now().day != self.now.day:
 			self.data.endDay()
 	
-	def readSensor(self):
-		GPIO.output(self.GPIO_TRIGGER, True)
+	
 
-		time.sleep(0.00001)
-
-		GPIO.output(self.GPIO_TRIGGER, False)
-
-		while GPIO.input(self.GPIO_ECHO) == 0:
-			START_TIME = time.time()
-
-		while GPIO.input(self.GPIO_ECHO) == 1:
-			STOP_TIME = time.time()
-
-		distance = ((STOP_TIME-START_TIME) * 34300) / 2
-
-		print(f'Distance in cm: {distance}')
-
-		self.timer4.start(CONFIG['SENSOR']['INTERVAL']*1000)
-		
 
 	@pyqtSlot(QImage)
 	def setImage(self, image):
@@ -288,11 +295,15 @@ class MainWindow(QWidget):
 
 
 		if len(names) > 1:
-			self.label1.setText('ERRO: 2 PESSOAS DETECTADAS')
+			self.button.setText('ERRO: 2 PESSOAS DETECTADAS')
+			playsound(self._PATH_TO_ERROR_MP3)
 		elif 'Unknown' in names:
 			print('Unknown Person Identified')
+			playsound(self._PATH_TO_ERROR_MP3)
 		else:
 			if self.prev_name is None or names[0] != self.prev_name:
+				playsound(self._PATH_TO_CONFIRMATION_MP3)
+
 				#Start timer for recognition
 				self.timer2.start(CONFIG['DETECTION']['RESET_PREV']*1000)
 
@@ -316,7 +327,7 @@ class MainWindow(QWidget):
 
 				self.button.setText(f'NOT {names[0].upper()}?')
 			else:
-				print('PASSED')
+				print('Name already recorded')
 
 	def restartRecognize(self):
 		print('ENDING TIMER')

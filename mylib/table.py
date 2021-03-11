@@ -1,23 +1,8 @@
-from PyQt5.QtWidgets import (QApplication, 
-	QWidget, 
-	QLabel, 
-	QPushButton, 
-	QTableWidget,
-	QTableWidgetItem, 
-	QTableView, 
-	QGridLayout,
-	QHBoxLayout,
-	QVBoxLayout)
+from PyQt5.QtWidgets import *
 
-from PyQt5.QtCore import (QThread, 
-	Qt, 
-	pyqtSignal, 
-	pyqtSlot, 
-	QAbstractTableModel)
+from PyQt5.QtCore import *
 
-from PyQt5.QtGui import (QImage, 
-	QPixmap, 
-	QStandardItemModel)
+from PyQt5.QtGui import *
 
 import sys, time, datetime, os
 import cv2

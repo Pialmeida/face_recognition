@@ -8,7 +8,10 @@
 	- ~~Add sidebar display with user details once recognized~~
 	- ~~Add prevention to double registers of the same name~~
 	- ~~Add calculation of hours worked at end of the day~~
+	- ~~Add sound effects for confirmation of entries~~
 	- Add auto-sender for individuals missing entries
+	- Add sensor to replace clickable button
+	
 - Create front-end UI for Computer Access
 	- Add registering functionality
 	- Add removal functionality
