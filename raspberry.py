@@ -125,8 +125,6 @@ class MainWindow(QWidget):
 		self.label.setAlignment(Qt.AlignTop)
 		self.left_layout.addWidget(self.label, int(self.height*0.67))
 		self.label.resize(int(self.width*0.5), int(self.height*0.5))
-		self.label.setStyleSheet("QLabel { background-color : violet;}")
-
 
 		self.monitor = Thread(self)
 		self.monitor.setTerminationEnabled(True)
@@ -158,7 +156,6 @@ class MainWindow(QWidget):
 		self.left_layout.addWidget(self.label1, self.height*0.35)
 		self.label1.resize(int(self.width*0.5),int(self.height*0.2))
 		self.label1.move(int(self.width*0.05),int(self.height*0.8))
-		self.label1.setStyleSheet("QLabel { background-color : blue;}")
 
 
 		#Layout for Button
@@ -339,6 +336,7 @@ class MainWindow(QWidget):
 		self.prev_name = None
 
 	def closeEvent(self, closeEvent):
+		self.monitor.cap.close()
 		self.monitor.terminate()
 		self.data.close()
 

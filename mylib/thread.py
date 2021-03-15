@@ -50,6 +50,7 @@ class VideoGet():
 
 	def close(self):
 		#Get rid of stream object
+		self.stop()
 		self.stream.release()
 
 
@@ -74,3 +75,6 @@ class VideoShow():
 	def stop(self):
 		#Set stop indicator to true
 		self.stopped = True
+
+if __name__ == '__main__':
+	pass
