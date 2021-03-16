@@ -4,21 +4,22 @@ import numpy as np
 import os
 import glob
 import re
+import json
+
+with open('config.json','r') as f:
+	CONFIG = json.load(f)
 
 class Camera():
 	def __init__(self, cam = 0):
-		self._DIRNAME = os.getcwd()
-		self._PATH = os.path.join(self._DIRNAME, 'known_people')
-
-		print(self._PATH)
+		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
 
 		self.totalFrames = 0
 
 		self.load_encodings()
 
 	def load_encodings(self):
-		self.known_face_names = [re.search(r'known_people\\(.*)\_\d\.jpg', x).group(1) for x in glob.glob(os.path.join(self._PATH,r'*.jpg'))]
-		self.known_face_encodings = [x[0] for x in [face_recognition.face_encodings(face_recognition.load_image_file(x)) for x in glob.glob(os.path.join(self._PATH,r'*.jpg'))]]
+		self.known_face_names = [re.search(r'known_people\\(.*)\_\d\.jpg', x).group(1) for x in glob.glob(os.path.join(self._PATH_TO_PICS,r'*.jpg'))]
+		self.known_face_encodings = [x[0] for x in [face_recognition.face_encodings(face_recognition.load_image_file(x)) for x in glob.glob(os.path.join(self._PATH_TO_PICS,r'*.jpg'))]]
 		print('KNOWN FACE NAMES \n\n')
 		print(self.known_face_names)
 		print('KNOWN FACE ENCODINGS \n\n')

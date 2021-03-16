@@ -2,20 +2,21 @@ import os, sqlite3, json
 import pandas as pd
 from datetime import datetime
 
+with open('config.json','r') as f:
+	CONFIG = json.load(f)
+
 class Data():
 	def __init__(self):
-		self._PATH_TO_DB = os.path.join(os.path.dirname(os.path.dirname(__file__)),'data','data.db')
+		self._PATH_TO_DB = CONFIG['PATH']['DATA']
 		self._PATH_TO_CONFIG = os.path.join(os.path.dirname(os.path.dirname(__file__)),'config.json')
 
 		self.conn = sqlite3.connect(self._PATH_TO_DB)
 		self.cursor = self.conn.cursor()
-
-		with open(self._PATH_TO_CONFIG,'r') as f:
-			CONFIG = json.load(f)
-			self._DAY_START = CONFIG['HOURS']['DAY_START']
-			self._DAY_END = CONFIG['HOURS']['DAY_END']
-			self._LUNCH_START = CONFIG['HOURS']['LUNCH_START']
-			self._LUNCH_END = CONFIG['HOURS']['LUNCH_END']
+		
+		self._DAY_START = CONFIG['HOURS']['DAY_START']
+		self._DAY_END = CONFIG['HOURS']['DAY_END']
+		self._LUNCH_START = CONFIG['HOURS']['LUNCH_START']
+		self._LUNCH_END = CONFIG['HOURS']['LUNCH_END']
 
 	def addEntry(self, name, now=datetime.now()):
 		today = now.strftime("%d/%m/%Y")

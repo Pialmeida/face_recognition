@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 
 from PyQt5.QtGui import *
 
-import sys, time, os
+import sys, time, os, re
 
 from datetime import datetime
 
@@ -58,45 +58,166 @@ class Thread(QThread):
 			self.changePixmap.emit(p)
 
 
-class NameEntry(QMainWindow):
-	nameEntered = pyqtSignal()
+class NameEntry(QWidget):
+	nameEntered = pyqtSignal(str)
 	killWindow = pyqtSignal()
 
 	def __init__(self):
 		QMainWindow.__init__(self)
 
-		self.setMinimumSize(QSize(320, 140))    
-		self.setWindowTitle("Name Entry") 
+		self.completed = False
 
-		self.nameLabel = QLabel(self)
-		self.nameLabel.setText('Name:')
+		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
+		self.title = 'Name Entry'
+		self.width = 300
+		self.height = 140
+
+		self._MAIN_WINDOW_LAYOUT = '''
+			background-color: #c5c6c7;
+		'''
+
+		self._BUTTON_LAYOUT = '''
+			QPushButton{
+				background-color: #640023;
+				border-style: outset;
+				border: 2px solid black;
+				font: bold 14px;
+				color: white;
+			}
+			QPushButton::Pressed{
+				background-color: #a3023a;
+				border-style: outset;
+				border: 2px solid black;
+				font: bold 14px;
+				color: white;
+			}
+		'''
+
+		self._TEXT_LABEL_LAYOUT = '''
+			QLabel{
+				font: bold 14px;
+				color: black;
+			}
+		'''
+
+		self._LINE_EDIT_LAYOUT = '''
+			QLineEdit{
+				background-color: white;
+				border-style: outset;
+				border: 2px solid black;
+				font: bold 14px;
+				color: black;
+			}
+		'''
+
+		self._TEXT_LABEL_LAYOUT_CONFIRM = '''
+			QLabel{
+				font: bold 14px;
+				color: green;
+			}
+		'''
+
+		self._TEXT_LABEL_LAYOUT_DENY = '''
+			QLabel{
+				font: bold 14px;
+				color: red;
+			}
+		'''
+
+		self.setupUI()
+
+
+	def setupUI(self):
+		#Window Properties
+		self.setFixedSize(self.width, self.height)    
+		self.setWindowTitle(self.title)
+		self.setStyleSheet(self._MAIN_WINDOW_LAYOUT)
+
+
+		#Main Definition
+		self.layout = QVBoxLayout()
+		self.setLayout(self.layout)
+
+		#Label for entry title
+		self.label = QLabel(self)
+		self.layout.addWidget(self.label)
+		self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+		#Horizontal Layout
+		self.hlayout = QHBoxLayout()
+		self.label.setLayout(self.hlayout)
+
+
+		#Name Title
+		self.label2 = QLabel(self)
+		self.hlayout.addWidget(self.label2)
+		self.label2.setText('Name:')
+		self.label2.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+
+		#Line Edit
 		self.line = QLineEdit(self)
+		self.line.setStyleSheet(self._LINE_EDIT_LAYOUT)
+		self.hlayout.addWidget(self.line)
 
-		self.line.move(80, 20)
-		self.line.resize(200, 32)
-		self.nameLabel.move(20, 20)
 
-		pybutton = QPushButton('OK', self)
-		pybutton.clicked.connect(self.clickMethod)
-		pybutton.resize(200,32)
-		pybutton.move(80, 60)
+		self.label3 = QLabel(self)
+		self.button_layout = QHBoxLayout()
+		self.label3.setLayout(self.button_layout)
 
-	def clickMethod(self):
-		self.nameEntered.emit()
+
+		self.button = QPushButton('SUBMIT', self)
+		self.button_layout.addWidget(self.button)
+		self.button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+		self.layout.addWidget(self.label3)
+		self.button.clicked.connect(self.on_click1)
+		self.button.setStyleSheet(self._BUTTON_LAYOUT)
+
+		self.label4 = QLabel(self)
+		self.layout.addWidget(self.label4)
+		self.label4.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+		self.label4.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
+
+		self.timer = QTimer(self)
+		self.timer.timeout.connect(self.registration_success)
+
+
+	def on_click1(self):
+		if self.line.text().upper() not in set(list([re.search('([\w ]+)_\d+.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)])) and self.line.text().upper() != "":
+			self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_CONFIRM)
+			self.label4.setText('SUCCESSFUL REGISTRATION')
+			self.timer.start(1000)
+		else:
+			self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
+			self.label4.setText('UNSUCCESSUL REGISTRATION')
+
+	def registration_success(self):
+		self.completed = True
+		self.nameEntered.emit(self.line.text())
+		self.killWindow.emit()
 
 	def closeEvent(self, event):
+		if self.completed == False:
+			for file in os.listdir(self._PATH_TO_PICS):
+				if file.startswith('temp'):
+					path = os.path.join(self._PATH_TO_PICS, file)
+					os.remove(path)
+
 		self.killWindow.emit()
 
 class RegisterWindow(QMainWindow):
 	killWindow = pyqtSignal()
+	name_entered = pyqtSignal(str)
 
 	def __init__(self):
 		super(RegisterWindow,self).__init__()
-		self.title = 'Iris Biometric Detection Register'
+
+		self.completed = False
+
+		self.title = 'Biometric Detection Register'
 		self.width = CONFIG['REGISTER_UI']['UI_WIDTH']
 		self.height = CONFIG['REGISTER_UI']['UI_HEIGHT']
 
-		self._PATH_TO_PICS = os.path.join(os.path.dirname(__file__),'known_people')
+		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
 
 		self._MAIN_WINDOW_LAYOUT = '''
 			background-color: #c5c6c7;
@@ -110,7 +231,7 @@ class RegisterWindow(QMainWindow):
 		self.setWindowTitle(self.title)
 		self.setFixedSize(self.width, self.height)
 
-		self.label = QLabel()
+		self.label = QLabel(self)
 
 		self.monitor = Thread()
 		
@@ -130,35 +251,47 @@ class RegisterWindow(QMainWindow):
 
 	def keyPressEvent(self, event):
 		if event.key() == Qt.Key_Space:
-			if self.monitor.count > 0:
-				print('dope')
-				print(self.monitor.count)
-				temp = (CONFIG['DETECTION']['PICS_REQ'] + 1)
-				name = f'temp_{temp - self.monitor.count}.jpg'
-				self.frame.save(os.path.join(self._PATH_TO_PICS, name))
-				self.monitor.count -= 1
-			else:
+			print(self.monitor.count)
+			temp = (CONFIG['DETECTION']['PICS_REQ'] + 1)
+			name = f'temp_{temp - self.monitor.count}.jpg'
+			self.frame.save(os.path.join(self._PATH_TO_PICS, name))
+			self.monitor.count -= 1
+
+			if self.monitor.count == 0:
 				self.nameEntry = NameEntry()
 				self.nameEntry.killWindow.connect(self._del_name_entry)
+				self.nameEntry.nameEntered.connect(self._name_entered)
 				self.nameEntry.show()
 
 	def _del_name_entry(self):
 		self.nameEntry.close()
-		del self.nameEntry
+		self.killWindow.emit()
+
+	@pyqtSlot(str)
+	def _name_entered(self, name):
+		self.completed = True
+		self.name_entered.emit(name)
+		self.killWindow.emit()
 
 	def closeEvent(self, event):
+		if self.completed == False:
+			for file in os.listdir(self._PATH_TO_PICS):
+				if file.startswith('temp'):
+					path = os.path.join(self._PATH_TO_PICS, file)
+					os.remove(path)
+
 		self.killWindow.emit()
 
 class MainWindow(QWidget):
 	def __init__(self):
 		super(MainWindow,self).__init__()
-		self.title = 'Iris Biometric Detection'
+		self.title = 'Biometric Detection'
 		self.width = CONFIG['UI']['UI_WIDTH']
 		self.height = CONFIG['UI']['UI_HEIGHT']
 
 		self._PATH_TO_LOGO = os.path.join(os.path.dirname(__file__),'logoAKAER.jpg')
 
-		self._PATH_TO_PICS = os.path.join(os.path.dirname(__file__),'known_people')
+		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
 
 		self._PATH_TO_CONFIRMATION_MP3 = os.path.join(os.path.dirname(__file__),'audio','confirmation.mp3')
 
@@ -217,7 +350,7 @@ class MainWindow(QWidget):
 		self.left_layout = QVBoxLayout()
 		self.layout.addLayout(self.left_layout)
 
-		self.label = QLabel()
+		self.label = QLabel(self)
 		self.left_layout.addWidget(self.label)
 		self.label.setStyleSheet("QLabel { background-color : blue;}")
 
@@ -229,7 +362,7 @@ class MainWindow(QWidget):
 
 		#Add Button
 		#Add button box
-		self.label2 = QLabel()
+		self.label2 = QLabel(self)
 		self.right_layout.addWidget(self.label2, int(self.height*0.1))
 		self.label2.setStyleSheet("QLabel { background-color : green;}")
 		self.button_layout = QVBoxLayout()
@@ -247,7 +380,7 @@ class MainWindow(QWidget):
 
 		#Remove Button
 		#Add button box 2
-		self.label3 = QLabel()
+		self.label3 = QLabel(self)
 		self.right_layout.addWidget(self.label3, int(self.height*0.1))
 		self.label3.setStyleSheet("QLabel { background-color : red;}")
 		self.button2_layout = QVBoxLayout()
@@ -265,7 +398,7 @@ class MainWindow(QWidget):
 
 		#Search Button
 		#Add Search Layout
-		self.label3 = QLabel()
+		self.label3 = QLabel(self)
 		self.right_layout.addWidget(self.label3, int(self.height*0.3))
 		self.label3.setStyleSheet("QLabel { background-color : yellow;}")
 		self.search_layout = QVBoxLayout()
@@ -287,15 +420,24 @@ class MainWindow(QWidget):
 		self.show() 
 
 	def on_click1(self):
-		print('cool')
 		self.registerWindow = RegisterWindow()
 		self.registerWindow.killWindow.connect(self._del_register_window)
+		self.registerWindow.name_entered.connect(self.renameTempFiles)
 		self.registerWindow.show()
 
 	def _del_register_window(self):
 		self.registerWindow.monitor.cap.close()
 		self.registerWindow.close()
-		del self.registerWindow
+
+	@pyqtSlot(str)
+	def renameTempFiles(self, name):
+		name = name.upper()
+		for file in os.listdir(self._PATH_TO_PICS):
+			if file.startswith('temp'):
+				path = os.path.join(self._PATH_TO_PICS, file)
+				path2 = path.replace('temp', name)
+				os.rename(path, path2)
+
 
 	def on_click2(self):
 		print('test')

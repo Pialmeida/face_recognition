@@ -58,7 +58,7 @@ class MainWindow(QWidget):
 
 		self._PATH_TO_LOGO = os.path.join(os.path.dirname(__file__),'logoAKAER.jpg')
 
-		self._PATH_TO_PICS = os.path.join(os.path.dirname(__file__),'known_people')
+		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
 
 		self._PATH_TO_CONFIRMATION_MP3 = os.path.join(os.path.dirname(__file__),'audio','confirmation.mp3')
 
