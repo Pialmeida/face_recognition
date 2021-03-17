@@ -109,7 +109,6 @@ class Data():
 	def getStatus(self,name):
 		pass
 
-
 	def close(self):
 		self.conn.close()
 

@@ -44,26 +44,34 @@ class Thread(QThread):
 			_, frame = self.cap.read()
 			names = []
 			frame2 = frame
-			rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-			rgbImage2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
+			rgbImage = cv2.flip(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), 1)
+			rgbImage2 = cv2.flip(cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB), 1)
 			h, w, ch = rgbImage.shape
 			bytesPerLine = ch * w
 			p2 = QImage(rgbImage2.data, w, h, bytesPerLine, QImage.Format_RGB888)
 			self.saveImage.emit(p2)
+
+			#Instructions
+			cv2.putText(rgbImage, self._TEXT, (int((w-self._TEXT_SIZE[0])/2), int(0.9*h)), self._FONT, 0.6, (0, 0, 0), 5)
 			cv2.putText(rgbImage, self._TEXT, (int((w-self._TEXT_SIZE[0])/2), int(0.9*h)), self._FONT, 0.6, (255, 255, 255), 2)
+			
+			#Photos Left
+			cv2.putText(rgbImage, self._TEXT2, (int(w-(self._TEXT_SIZE2[0]+10)), int(0.1*h)), self._FONT, 0.6, (0, 0, 0), 5)
 			cv2.putText(rgbImage, self._TEXT2, (int(w-(self._TEXT_SIZE2[0]+10)), int(0.1*h)), self._FONT, 0.6, (255, 255, 255), 2)
+			
 			cv2.ellipse(rgbImage, (int(w/2),int(h/2)), (100,150), 0, 0, 360, (255, 255, 255), 2)
 			convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
 			p = convertToQtFormat.scaled(int(CONFIG['REGISTER_UI']['UI_WIDTH']), int(CONFIG['REGISTER_UI']['UI_HEIGHT']), Qt.KeepAspectRatio)
 			self.changePixmap.emit(p)
 
 
-class NameEntry(QWidget):
+#Enter Name for Registration
+class NameRegistration(QWidget):
 	nameEntered = pyqtSignal(str)
 	killWindow = pyqtSignal()
 
 	def __init__(self):
-		QMainWindow.__init__(self)
+		QWidget.__init__(self)
 
 		self.completed = False
 
@@ -164,7 +172,7 @@ class NameEntry(QWidget):
 		self.button_layout = QHBoxLayout()
 		self.label3.setLayout(self.button_layout)
 
-
+		#Button to submit name
 		self.button = QPushButton('SUBMIT', self)
 		self.button_layout.addWidget(self.button)
 		self.button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
@@ -172,20 +180,31 @@ class NameEntry(QWidget):
 		self.button.clicked.connect(self.on_click1)
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
 
+		#Label for Success/Failure
 		self.label4 = QLabel(self)
 		self.layout.addWidget(self.label4)
 		self.label4.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 		self.label4.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
 
+		#Success Timer
 		self.timer = QTimer(self)
 		self.timer.timeout.connect(self.registration_success)
 
+		#Failure Timer
+		self.timer2 = QTimer(self)
+		self.timer2.timeout.connect(lambda: self.killWindow.emit())
+
 
 	def on_click1(self):
-		if self.line.text().upper() not in set(list([re.search('([\w ]+)_\d+.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)])) and self.line.text().upper() != "":
-			self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_CONFIRM)
-			self.label4.setText('SUCCESSFUL REGISTRATION')
-			self.timer.start(1000)
+		if self.line.text().upper() not in set([re.search('([\w ]+)_\d+.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]) and self.line.text().upper() != "":
+			if Camera(_all = False).load_encodings(_all = False):
+				self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_CONFIRM)
+				self.label4.setText('SUCCESSFUL REGISTRATION')
+				self.timer.start(1000)
+			else:
+				self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
+				self.label4.setText('INVALID PICTURES')
+				self.timer2.start(1000)
 		else:
 			self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
 			self.label4.setText('UNSUCCESSUL REGISTRATION')
@@ -194,6 +213,7 @@ class NameEntry(QWidget):
 		self.completed = True
 		self.nameEntered.emit(self.line.text())
 		self.killWindow.emit()
+
 
 	def closeEvent(self, event):
 		if self.completed == False:
@@ -258,7 +278,7 @@ class RegisterWindow(QMainWindow):
 			self.monitor.count -= 1
 
 			if self.monitor.count == 0:
-				self.nameEntry = NameEntry()
+				self.nameEntry = NameRegistration()
 				self.nameEntry.killWindow.connect(self._del_name_entry)
 				self.nameEntry.nameEntered.connect(self._name_entered)
 				self.nameEntry.show()
@@ -281,6 +301,176 @@ class RegisterWindow(QMainWindow):
 					os.remove(path)
 
 		self.killWindow.emit()
+
+class NameDeregistration(QWidget):
+	nameEntered = pyqtSignal(str)
+	killWindow = pyqtSignal()
+
+	def __init__(self):
+		QWidget.__init__(self)
+
+		self._unconfirmed_name = None
+		self._unconfirmed = True
+
+		self.completed = False
+
+		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
+		self.title = 'Name Deregistration'
+		self.width = 400
+		self.height = 400
+
+		self._MAIN_WINDOW_LAYOUT = '''
+			background-color: #c5c6c7;
+		'''
+
+		self._BUTTON_LAYOUT = '''
+			QPushButton{
+				background-color: #640023;
+				border-style: outset;
+				border: 2px solid black;
+				font: bold 14px;
+				color: white;
+			}
+			QPushButton::Pressed{
+				background-color: #a3023a;
+				border-style: outset;
+				border: 2px solid black;
+				font: bold 14px;
+				color: white;
+			}
+		'''
+
+		self._TEXT_LABEL_LAYOUT = '''
+			QLabel{
+				font: bold 14px;
+				color: black;
+			}
+		'''
+
+		self._COMBOBOX_LAYOUT = '''
+			QComboBox{
+				background-color: white;
+				border-style: outset;
+				border: 2px solid black;
+				font: bold 14px;
+				color: black;
+			}
+		'''
+
+		self._TEXT_LABEL_LAYOUT_CONFIRM = '''
+			QLabel{
+				font: bold 14px;
+				color: green;
+			}
+		'''
+
+		self._TEXT_LABEL_LAYOUT_DENY = '''
+			QLabel{
+				font: bold 14px;
+				color: red;
+			}
+		'''
+
+		self.setupUI()
+
+
+	def setupUI(self):
+		#Window Properties
+		self.setFixedSize(self.width, self.height)    
+		self.setWindowTitle(self.title)
+		self.setStyleSheet(self._MAIN_WINDOW_LAYOUT)
+
+
+		#Main Definition
+		self.layout = QVBoxLayout()
+		self.setLayout(self.layout)
+
+
+		#Label for picture
+		self.label = QLabel(self)
+		self.layout.addWidget(self.label)
+		self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+		self.label.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
+		self.label.setMinimumHeight(int(self.height*0.6))
+
+		#Label for entry title
+		self.label1 = QLabel(self)
+		self.layout.addWidget(self.label1)
+		self.label1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+		#Horizontal Layout
+		self.hlayout = QHBoxLayout()
+		self.label1.setLayout(self.hlayout)
+
+
+		#Name Title
+		self.label2 = QLabel(self)
+		self.hlayout.addWidget(self.label2)
+		self.label2.setText('Name:')
+		self.label2.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+
+		#Combo Box with Names to Deregister
+		self.combobox = QComboBox(self)
+		self.combobox.setStyleSheet(self._COMBOBOX_LAYOUT)
+		self.combobox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+		self.combobox.activated[str].connect(self.updatePic)
+		self.hlayout.addWidget(self.combobox)
+
+		#Add Names to Combo Box
+		[self.combobox.addItem(name) for name in sorted(set([re.search('([\w ]+)_\d+.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]))]
+
+
+		self.label3 = QLabel(self)
+		self.button_layout = QHBoxLayout()
+		self.label3.setLayout(self.button_layout)
+
+		#Button to submit name
+		self.button = QPushButton('SUBMIT', self)
+		self.button_layout.addWidget(self.button)
+		self.button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+		self.layout.addWidget(self.label3)
+		self.button.clicked.connect(self.on_click1)
+		self.button.setStyleSheet(self._BUTTON_LAYOUT)
+
+		#Label for Success/Failure
+		self.label4 = QLabel(self)
+		self.layout.addWidget(self.label4)
+		self.label4.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+		self.label4.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
+
+		#Success Timer
+		self.timer = QTimer(self)
+		self.timer.timeout.connect(self.deregistration_success)
+
+
+	def on_click1(self):
+		if self._unconfirmed:
+			self._unconfirmed = False
+			self.button.setText('PRESS AGAIN TO UNREGISTER')
+		else:
+			self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_CONFIRM)
+			self.label4.setText('SUCCESSFUL REGISTRATION')
+			self.timer.start(1000)
+
+	def updatePic(self, name):
+		if self._unconfirmed == False:
+			self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
+			self.label4.setText('CANCELLED DEREGISTRATION')
+
+		self.button.setText('SUBMIT')
+		self._unconfirmed = True
+		path = os.path.join(self._PATH_TO_PICS,f'{name}_1.jpg')
+		image = QPixmap(path).scaled(int(self.width*0.9), int(self.height*0.6), Qt.KeepAspectRatio)
+		self.label.setPixmap(image)
+
+	def deregistration_success(self):
+		self.completed = True
+		self.nameEntered.emit(self.combobox.currentText())
+		self.killWindow.emit()
+
+	def closeEvent(self, event):
+		self.killWindow.emit()
+
 
 class MainWindow(QWidget):
 	def __init__(self):
@@ -371,6 +561,7 @@ class MainWindow(QWidget):
 		#Button
 		self.button = QPushButton('REGISTER', self)
 		self.button_layout.addWidget(self.button)
+		self.button_layout.setContentsMargins(0, 0, 0, 0)
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 		self.button.setToolTip('Press to register new individual')
@@ -389,11 +580,11 @@ class MainWindow(QWidget):
 		#Button
 		self.button2 = QPushButton('REMOVE', self)
 		self.button2_layout.addWidget(self.button2)
+		self.button2_layout.setContentsMargins(0, 0, 0, 0)
 		self.button2.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button2.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 		self.button2.setToolTip('Press to de-register new individual')
 		self.button2.clicked.connect(self.on_click2)
-
 
 
 		#Search Button
@@ -440,25 +631,22 @@ class MainWindow(QWidget):
 
 
 	def on_click2(self):
-		print('test')
+		self.nameEntry = NameDeregistration()
+		self.nameEntry.killWindow.connect(self._del_name_entry)
+		self.nameEntry.nameEntered.connect(self._name_entered)
+		self.nameEntry.show()
 
-	def on_click3(self):
-		pass
 
-	def on_click4(self):
-		pass
+	def _del_name_entry(self):
+		self.nameEntry.close()
 
-	def on_click5(self):
-		pass
+	@pyqtSlot(str)
+	def _name_entered(self, name):
+		for file in os.listdir(self._PATH_TO_PICS):
+			if file.startswith(name.upper()):
+				path = os.path.join(self._PATH_TO_PICS, file)
+				os.remove(path)
 
-	def on_click6(self):
-		pass
-
-	def on_click7(self):
-		pass
-
-	def on_click8(self):
-		pass
 
 	def closeEvent(self, event):
 		pass

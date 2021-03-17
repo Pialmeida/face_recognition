@@ -38,7 +38,7 @@ class Thread(QThread):
 		while True:
 			_, frame = self.cap.read()
 			names = []
-			rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+			rgbImage = cv2.flip(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), 1)
 			h, w, ch = rgbImage.shape
 			bytesPerLine = ch * w
 			convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
@@ -274,9 +274,6 @@ class MainWindow(QWidget):
 	def alertUser(self):
 		if datetime.now().day != self.now.day:
 			self.data.endDay()
-	
-	
-
 
 	@pyqtSlot(QImage)
 	def setImage(self, image):

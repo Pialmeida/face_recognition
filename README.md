@@ -17,8 +17,8 @@
 	- Add registering functionality
 		- ~~Add mechanism to prevent repetition~~
 		- ~~Add deletion of pictures if operation is closed~~
+		- ~~Add confirmation of model acceptance of pictures~~
 		- Add confirmation of names in database
-		- Add confirmation of model acceptance of pictures
 	- Add removal functionality
 		- Add lookup of user
 	- Add auto-save functinality

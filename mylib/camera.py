@@ -10,20 +10,29 @@ with open('config.json','r') as f:
 	CONFIG = json.load(f)
 
 class Camera():
-	def __init__(self, cam = 0):
+	def __init__(self, _all = True):
 		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
 
 		self.totalFrames = 0
 
-		self.load_encodings()
+		if _all:
+			self.load_encodings(_all)
 
-	def load_encodings(self):
-		self.known_face_names = [re.search(r'known_people\\(.*)\_\d\.jpg', x).group(1) for x in glob.glob(os.path.join(self._PATH_TO_PICS,r'*.jpg'))]
-		self.known_face_encodings = [x[0] for x in [face_recognition.face_encodings(face_recognition.load_image_file(x)) for x in glob.glob(os.path.join(self._PATH_TO_PICS,r'*.jpg'))]]
-		print('KNOWN FACE NAMES \n\n')
-		print(self.known_face_names)
-		print('KNOWN FACE ENCODINGS \n\n')
-		print(self.known_face_encodings)
+	def load_encodings(self, _all):
+		if _all == True:
+			self.known_face_names = [re.search(r'known_people\\(.*)\_\d+\.jpg', os.path.join(self._PATH_TO_PICS,x)).group(1) for x in os.listdir(self._PATH_TO_PICS) if x.endswith(r'.jpg')]
+			self.known_face_encodings = [x[0] for x in [face_recognition.face_encodings(face_recognition.load_image_file(os.path.join(self._PATH_TO_PICS, x))) for x in os.listdir(self._PATH_TO_PICS) if x.endswith(r'.jpg')]]
+			print('KNOWN FACE NAMES \n\n')
+			print(self.known_face_names)
+			print('KNOWN FACE ENCODINGS \n\n')
+			print(self.known_face_encodings)
+		else:
+			try:
+				[x[0] for x in [face_recognition.face_encodings(face_recognition.load_image_file(os.path.join(self._PATH_TO_PICS, x))) for x in os.listdir(self._PATH_TO_PICS) if x.endswith(r'.jpg') and x.startswith(r'temp')]]
+				return True
+			except Exception:
+				return False
+
 
 
 	def recognize(self, frame):
