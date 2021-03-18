@@ -600,6 +600,12 @@ class MainWindow(QWidget):
 		self.search_layout.addWidget(self.line)
 		self.line.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
 
+		#Search
+		self.button3 = QPushButton('SEARCH', self)
+		self.search_layout.addWidget(self.button3)
+		self.button3.setToolTip('Press to refresh log')
+		self.button3.setStyleSheet(self._BUTTON_LAYOUT)
+
 
 		#Business Stuff
 		self.label6 = QLabel(self)
@@ -646,7 +652,6 @@ class MainWindow(QWidget):
 			if file.startswith(name.upper()):
 				path = os.path.join(self._PATH_TO_PICS, file)
 				os.remove(path)
-
 
 	def closeEvent(self, event):
 		pass

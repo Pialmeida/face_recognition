@@ -19,8 +19,8 @@
 		- ~~Add deletion of pictures if operation is closed~~
 		- ~~Add confirmation of model acceptance of pictures~~
 		- Add confirmation of names in database
-	- Add removal functionality
-		- Add lookup of user
+	- ~~Add removal functionality~~
+		- ~~Add lookup of user~~
 	- Add auto-save functinality
 	- Add name-lookup functionality
 	- Add auto-updating log of entry
