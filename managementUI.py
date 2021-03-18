@@ -6,17 +6,11 @@ import sys, time, os, re
 
 from datetime import datetime
 
-import cv2
-import pandas as pd
-import numpy as np
-
 import json
 
 from playsound import playsound
 
 from mylib.data import Data
-from mylib.camera import Camera
-from mylib.thread import VideoGet
 from mylib.extendedCombo import ExtendedComboBox
 
 from UI_elements.management.registerWindow import RegisterWindow
@@ -72,6 +66,28 @@ class MainWindow(QWidget):
 			}
 		'''
 
+		self._DATEEDIT_LAYOUT = '''
+			QDateEdit
+			{
+				background-color: white;
+				border-style: solid;
+				border-width: 2px;
+				border-color: black;
+			}
+			QDateEdit::drop-down {
+				image: url(:/new/myapp/cbarrowdn.png);
+				width:50px;
+				height:15px;
+				subcontrol-position: right top;
+				subcontrol-origin:margin;
+				background-color: white;
+				border-style: solid;
+				border-width: 4px;
+				border-color: rgb(100,100,100);
+			   spacing: 5px; 
+			}
+		'''
+
 		self._TEXT_LABEL_LAYOUT = '''
 			QLabel{
 				background-color: pink;
@@ -100,7 +116,6 @@ class MainWindow(QWidget):
 		self.layout.setContentsMargins(5,5,5,5)
 		self.setLayout(self.layout)
 
-
 		#Left Side
 		self.left_layout = QVBoxLayout()
 		self.layout.addLayout(self.left_layout)
@@ -108,7 +123,6 @@ class MainWindow(QWidget):
 		self.label = QLabel(self)
 		self.left_layout.addWidget(self.label)
 		self.label.setStyleSheet("QLabel { background-color : blue;}")
-
 
 		#Right Layout
 		self.right_layout = QVBoxLayout()
@@ -118,7 +132,7 @@ class MainWindow(QWidget):
 		#Add Button
 		#Add button box
 		self.label2 = QLabel(self)
-		self.right_layout.addWidget(self.label2, int(self.height*0.1))
+		self.right_layout.addWidget(self.label2, int(self.height*0.05))
 		self.button_layout = QVBoxLayout()
 		self.label2.setLayout(self.button_layout)
 
@@ -132,11 +146,10 @@ class MainWindow(QWidget):
 		self.button.clicked.connect(self.on_click1)
 
 
-
 		#Remove Button
 		#Add button box 2
 		self.label3 = QLabel(self)
-		self.right_layout.addWidget(self.label3, int(self.height*0.1))
+		self.right_layout.addWidget(self.label3, int(self.height*0.05))
 		self.button2_layout = QVBoxLayout()
 		self.label3.setLayout(self.button2_layout)
 
@@ -156,39 +169,139 @@ class MainWindow(QWidget):
 		self.label3.setStyleSheet("QLabel { background-color : yellow;}")
 		self.search_layout = QVBoxLayout()
 		self.label3.setLayout(self.search_layout)
+		self.search_layout.setContentsMargins(0, 0, 0, 0)
 
 
-		#Filter Section Section
+		#Filter Section
 		self.label4 = QLabel(self)
-		self.search_layout.addWidget(self.label4, alignment=Qt.AlignTop)
+		self.search_layout.addWidget(self.label4)
 		self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT)
 		self.label4.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 		self.label4.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
 		self.label4.setText('FILTER')
 
 
+		#Date
+		self.label5 = QLabel(self)
+		self.label5.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label5.setMinimumHeight(int(self.height*0.05))
+		self.search_layout.addWidget(self.label5)
+
+		#Date Layout
+		self.date_layout = QHBoxLayout()
+		self.label5.setLayout(self.date_layout)
+		self.date_layout.setContentsMargins(3, 0, 3, 0)
+
+		#Date From Label
+		self.label6 = QLabel(self)
+		self.date_layout.addWidget(self.label6)
+		self.label6.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label6.setText('From: ')
+		self.label6.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+
+		#From Data Select
+		self.datefrom = QDateEdit(self)
+		self.date_layout.addWidget(self.datefrom)
+		self.datefrom.setStyleSheet(self._DATEEDIT_LAYOUT)
+
+		#Date To Label
+		self.label7 = QLabel(self)
+		self.date_layout.addWidget(self.label7)
+		self.label7.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label7.setText('To: ')
+		self.label7.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+
+		#Date to Select
+		self.dateto = QDateEdit(self)
+		self.date_layout.addWidget(self.dateto)
+		self.dateto.setStyleSheet(self._DATEEDIT_LAYOUT)
+
 		#ComboBox for Search
+		self.label8 = QLabel(self)
+		self.label8.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label8.setMinimumHeight(int(self.height*0.05))
+		self.search_layout.addWidget(self.label8)
+
+		#Layout for Control Buttons
+		self.combox_layout = QHBoxLayout()
+		self.label8.setLayout(self.combox_layout)
+		self.combox_layout.setContentsMargins(3, 0, 3, 0)
+
+		#Label for Name
+		self.label9 = QLabel(self)
+		self.combox_layout.addWidget(self.label9)
+		self.label9.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label9.setText('Name: ')
+		self.label9.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+
+		#Combo Box to Put Names
 		self.combobox = ExtendedComboBox(self)
+		self.combox_layout.addWidget(self.combobox)
 		self.combobox.setStyleSheet(self._COMBOBOX_LAYOUT)
 		self.combobox.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 		self.combobox.setMinimumHeight(int(self.height*0.05))
 		self.combobox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 		self.combobox.addItem('')
-		self.search_layout.addWidget(self.combobox)
+		self.combobox.addItem('ALL')
+
+
+		#Filter Control Buttons
+		self.label10 = QLabel(self)
+		self.label10.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label10.setMinimumHeight(int(self.height*0.05))
+		self.search_layout.addWidget(self.label10)
+
+		#Layout for Control Buttons
+		self.filter_control_layout = QHBoxLayout()
+		self.label10.setLayout(self.filter_control_layout)
+		self.filter_control_layout.setContentsMargins(0, 0, 0, 0)
 
 		#Search Button
 		self.button3 = QPushButton('SEARCH', self)
-		self.search_layout.addWidget(self.button3)
-		self.button3.setToolTip('Press to refresh log')
+		self.filter_control_layout.addWidget(self.button3)
+		self.button3.setToolTip('Press to apply current filter')
+		self.button3.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 		self.button3.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button3.clicked.connect(self.on_click3)
 
+		#Clear
+		self.button4 = QPushButton('CLEAR', self)
+		self.filter_control_layout.addWidget(self.button4)
+		self.button4.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+		self.button4.setToolTip('Press to clear filters')
+		self.button4.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button4.clicked.connect(self.on_click4)
 
 		#Business Stuff
-		self.label6 = QLabel(self)
-		self.right_layout.addWidget(self.label6, int(self.height*0.2))
-		self.label6.setAlignment(Qt.AlignHCenter  | Qt.AlignBottom)
+		self.label11 = QLabel(self)
+		self.right_layout.addWidget(self.label11)
+		self.label11.setAlignment(Qt.AlignRight  | Qt.AlignBottom)
+		self.label11.setStyleSheet("QLabel{background-color: purple;}")
+		self.label11.setPixmap(QPixmap(self._PATH_TO_LOGO).scaled(int(self.width*0.45), int(self.height*0.2), Qt.KeepAspectRatio))
 
-		self.label6.setPixmap(QPixmap(self._PATH_TO_LOGO).scaled(int(self.width*0.45), int(self.height*0.3), Qt.KeepAspectRatio))
+
+		#Log Managing Layout
+		self.label12 = QLabel(self)
+		self.left_layout.addWidget(self.label12)
+		self.label12.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label12.setMinimumHeight(int(self.height*0.05))
+
+		self.logman_layout = QHBoxLayout()
+		self.label12.setLayout(self.logman_layout)
+		self.logman_layout.setContentsMargins(0, 0, 0, 0)
+
+		#To excel
+		self.button5 = QPushButton('TO EXCEL', self)
+		self.logman_layout.addWidget(self.button5)
+		self.button5.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button5.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+
+		#Generate monthly report
+		self.button6 = QPushButton('MONTHLY REPORT', self)
+		self.logman_layout.addWidget(self.button6)
+		self.button6.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button6.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+
 
 		self.show() 
 
@@ -218,6 +331,14 @@ class MainWindow(QWidget):
 		self.nameEntry.nameEntered.connect(self._name_entered)
 		self.nameEntry.show()
 
+	def on_click3(self):
+		pass
+
+	def on_click4(self):
+		pass
+
+	def filterDate(self, date):
+		print(date)
 
 	def _del_name_entry(self):
 		self.nameEntry.close()

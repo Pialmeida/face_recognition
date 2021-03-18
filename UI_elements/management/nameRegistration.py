@@ -15,11 +15,7 @@ import cv2
 import pandas as pd
 import numpy as np
 
-import sqlite3
-
 import json
-
-from playsound import playsound
 
 from mylib.thread import VideoGet
 from mylib.camera import Camera
