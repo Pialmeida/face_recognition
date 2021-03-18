@@ -4,6 +4,8 @@
 - Create Raspberry Pi front-end UI
 	- ~~Add camera thread to UI~~
 	- ~~Add background data management~~
+		- ~~Add SQL management of database~~
+		- ~~Add path locations to *config.json*~~
 	- ~~Add rollback feature for misidentification~~
 	- ~~Add sidebar display with user details once recognized~~
 	- ~~Add prevention to double registers of the same name~~
@@ -12,7 +14,8 @@
 	- ~~Add sensor to replace clickable button~~
 	- ~~Add multi-entry system compatibility~~
 	- Add auto-sender for individuals missing entries
-	
+		- ~~Recognize users missing entries~~
+
 - Create front-end UI for Computer Access
 	- Add registering functionality
 		- ~~Add mechanism to prevent repetition~~
@@ -21,7 +24,9 @@
 		- Add confirmation of names in database
 	- ~~Add removal functionality~~
 		- ~~Add lookup of user~~
-	- Add auto-save functinality
-	- Add name-lookup functionality
+		- ~~Add prevention of invalid name~~
 	- Add auto-updating log of entry
-	- Add database to cloud storage
+		- Add auto-save functionality
+		- Add name-lookup functionality
+		- Add filter-by options
+		

@@ -1,13 +1,20 @@
 import os, sqlite3, json
 import pandas as pd
 from datetime import datetime
+import sys
 
-with open('config.json','r') as f:
-	CONFIG = json.load(f)
+if __name__ == '__main__':
+	sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+_PATH = os.path.dirname(os.path.dirname(__file__))
+
+with open(os.path.join(_PATH,'config.json'),'r') as f:
+		CONFIG = json.load(f)
 
 class Data():
 	def __init__(self):
 		self._PATH_TO_DB = CONFIG['PATH']['DATA']
+
 		self._PATH_TO_CONFIG = os.path.join(os.path.dirname(os.path.dirname(__file__)),'config.json')
 
 		self.conn = sqlite3.connect(self._PATH_TO_DB)
@@ -114,4 +121,3 @@ class Data():
 
 if __name__ == '__main__':
 	data = Data()
-	data.addLunchTime('09/03/2021')

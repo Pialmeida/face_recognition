@@ -6,7 +6,12 @@ import glob
 import re
 import json
 
-with open('config.json','r') as f:
+if __name__ == '__main__':
+	sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+_PATH = os.path.dirname(os.path.dirname(__file__))
+
+with open(os.path.join(_PATH,'config.json'),'r') as f:
 	CONFIG = json.load(f)
 
 class Camera():
