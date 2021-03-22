@@ -4,14 +4,16 @@ from PyQt5.QtGui import *
 
 import sys, time, os, re
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import json
+import pandas as pd
 
 from playsound import playsound
 
 from mylib.data import Data
 from mylib.extendedCombo import ExtendedComboBox
+from mylib.table import MyTable, Table
 
 from UI_elements.management.registerWindow import RegisterWindow
 from UI_elements.management.nameDeregistration import NameDeregistration
@@ -100,6 +102,8 @@ class MainWindow(QWidget):
 
 		self.now = datetime.now()
 
+		self.filter = {}
+
 		self.prev_name = None
 
 		self.data = Data()
@@ -123,6 +127,25 @@ class MainWindow(QWidget):
 		self.label = QLabel(self)
 		self.left_layout.addWidget(self.label)
 		self.label.setStyleSheet("QLabel { background-color : blue;}")
+
+		#Log Layout
+		self.log_layout = QVBoxLayout()
+		self.label.setLayout(self.log_layout)
+		self.log_layout.setContentsMargins(0, 0, 0, 0)
+
+		#Table
+		self.table_model = Table(self.data.getLog())
+
+		self.log = MyTable(self.table_model)
+		self.log.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+		self.log_layout.addWidget(self.log)
+		self.log.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+
+		#Timer for table update
+		self.timer = QTimer(self)
+		self.timer.timeout.connect(self.updateLog)
+		self.timer.start(CONFIG['UI']['REFRESH_TIME']*1000)
 
 		#Right Layout
 		self.right_layout = QVBoxLayout()
@@ -174,7 +197,7 @@ class MainWindow(QWidget):
 
 		#Filter Section
 		self.label4 = QLabel(self)
-		self.search_layout.addWidget(self.label4)
+		self.search_layout.addWidget(self.label4, alignment = Qt.AlignTop)
 		self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT)
 		self.label4.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 		self.label4.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
@@ -201,6 +224,7 @@ class MainWindow(QWidget):
 
 		#From Data Select
 		self.datefrom = QDateEdit(self)
+		self.datefrom.setDate(QDate((self.now - timedelta(30)).year, (self.now - timedelta(30)).month, (self.now - timedelta(30)).day))
 		self.date_layout.addWidget(self.datefrom)
 		self.datefrom.setStyleSheet(self._DATEEDIT_LAYOUT)
 
@@ -213,6 +237,7 @@ class MainWindow(QWidget):
 
 		#Date to Select
 		self.dateto = QDateEdit(self)
+		self.dateto.setDate(QDate(self.now.year, self.now.month, self.now.day))
 		self.date_layout.addWidget(self.dateto)
 		self.dateto.setStyleSheet(self._DATEEDIT_LAYOUT)
 
@@ -243,13 +268,14 @@ class MainWindow(QWidget):
 		self.combobox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 		self.combobox.addItem('')
 		self.combobox.addItem('ALL')
+		[self.combobox.addItem(x) for x in self.data.getNames()['NOME'].tolist()]
 
 
 		#Filter Control Buttons
 		self.label10 = QLabel(self)
 		self.label10.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 		self.label10.setMinimumHeight(int(self.height*0.05))
-		self.search_layout.addWidget(self.label10)
+		self.search_layout.addWidget(self.label10, alignment = Qt.AlignBottom)
 
 		#Layout for Control Buttons
 		self.filter_control_layout = QHBoxLayout()
@@ -305,6 +331,12 @@ class MainWindow(QWidget):
 
 		self.show() 
 
+	def updateLog(self):
+		data = self.data.getLog(self.filter)
+		self.table_model = Table(data)
+		self.log.setModel(self.table_model)
+
+
 	def on_click1(self):
 		self.registerWindow = RegisterWindow()
 		self.registerWindow.killWindow.connect(self._del_register_window)
@@ -332,13 +364,12 @@ class MainWindow(QWidget):
 		self.nameEntry.show()
 
 	def on_click3(self):
-		pass
+		self.filter['date'] = [self.datefrom.date().toString('dd/MM/yyyy'), self.dateto.date().toString('dd/MM/yyyy')]
+		self.filter['name'] = self.combobox.currentText()
+		self.updateLog()
 
 	def on_click4(self):
 		pass
-
-	def filterDate(self, date):
-		print(date)
 
 	def _del_name_entry(self):
 		self.nameEntry.close()

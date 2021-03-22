@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from PyQt5.QtGui import *
-
 import sys, time, datetime, os
 import cv2
 import pandas as pd
@@ -11,30 +10,52 @@ import pandas as pd
 import sqlite3
 import random
 
-class MyTable(QTableWidget):
-	def __init__(self):
-		super(MyTable, self).__init__()
-		self.MaxCount = 10
-		self.MaxCount = 4
+class MyTable(QTableView):
+	def __init__(self, model, parent = None):
+		super(MyTable, self).__init__(parent)
+ 
+		rowHeight = self.fontMetrics().height()
+		self.verticalHeader().setDefaultSectionSize(rowHeight)
+		self.setModel(model)
+ 
+	def resizeEvent(self, event):
+		width = event.size().width()
+		self.setColumnWidth(0, width * 0.30)
+		self.setColumnWidth(1, width * 0.25)
+		self.setColumnWidth(2, width * 0.15)
+		self.setColumnWidth(3, width * 0.30)
 
-		self.loadData()
 
-	def loadData(self):
-		self.conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data','data.db'))
-		self.cursor = self.conn.cursor()
+class Table(QAbstractTableModel):
+	def __init__(self, data = []):
+		super(Table, self).__init__()
+		self._data = data
 
-		self.df = pd.read_sql_query(r"SELECT * FROM log", self.conn)
+	def data(self, index, role):
+		if role == Qt.DisplayRole:
+			value = self._data.iloc[index.row(), index.column()]
+			return str(value)
 
-		self.conn.close()
+	def rowCount(self, index):
+		return self._data.shape[0]
 
-	def updateEntry(self):
-		pass
+	def columnCount(self, index):
+		return self._data.shape[1]
 
-	def filterData(self, criteria=None, value=None):
-		pass
+	def headerData(self, section, orientation, role):
+		# section is the index of the column/row.
+		if role == Qt.DisplayRole:
+			if orientation == Qt.Horizontal:
+				return str(self._data.columns[section])
+
+			if orientation == Qt.Vertical:
+				return str(self._data.index[section])
+	
+	def updateData(self, data):
+		self._data = data
 
 
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
-	a = MyTable()
+	a = MyTable([1, 1])

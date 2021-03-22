@@ -25,6 +25,7 @@ class Data():
 		self._LUNCH_START = CONFIG['HOURS']['LUNCH_START']
 		self._LUNCH_END = CONFIG['HOURS']['LUNCH_END']
 
+
 	def addEntry(self, name, now=datetime.now()):
 		today = now.strftime("%d/%m/%Y")
 
@@ -33,7 +34,7 @@ class Data():
 		data = self.cursor.execute(f"SELECT * FROM log WHERE NOME = '{name}' AND DIA = '{today}'").fetchone()
 
 		if data is not None:
-			(_, _, _, IN1, OUT1, IN2, OUT2, _) = data
+			(_, _, _, IN1, OUT1, IN2, OUT2, _, _) = data
 	
 		if data is None:
 			print(f'{name} NOW IN')
@@ -69,7 +70,7 @@ class Data():
 		data = self.cursor.execute(f"SELECT * FROM log WHERE NOME = '{name}' AND DIA = '{today}'").fetchone()
 
 		if data is not None:
-			(_, DAY, _, IN1, OUT1, IN2, OUT2, _) = data
+			(_, DAY, _, IN1, OUT1, IN2, OUT2, _, _) = data
 
 		# if IN1 is not None and now.day != datetime.strptime(DAY,r'%d/%m/%Y').day:
 		# 	print('testing')
@@ -91,6 +92,53 @@ class Data():
 
 	def getDF(self):
 		return pd.read_sql_query(r"SELECT * FROM log", self.conn)
+
+	def getNames(self):
+		return pd.read_sql_query(f'''
+			SELECT DISTINCT NOME FROM log
+		''', self.conn)
+
+	def getLog(self, _filter={}):
+		if _filter == {}:
+			return pd.read_sql_query(f'''
+				SELECT [NOME], [DIA], [STATUS],
+					TIME(MAX(
+						MAX(coalesce(strftime('%s', ENTRADA), 0)),
+						MAX(coalesce(strftime('%s', SAIDA), 0))
+					), 'unixepoch') AS HORA
+				FROM log
+				GROUP BY NOME, DIA
+				ORDER BY DIA DESC, HORA DESC
+				''', self.conn)
+		else:
+			name = _filter['name'].upper()
+			start = _filter['date'][0]
+			end = _filter['date'][1]
+
+			if name == '' or name == 'all':
+				return pd.read_sql_query(f'''
+					SELECT [NOME], [DIA], [STATUS],
+						TIME(MAX(
+							MAX(coalesce(strftime('%s', ENTRADA), 0)),
+							MAX(coalesce(strftime('%s', SAIDA), 0))
+					   ), 'unixepoch') AS HORA
+					FROM log
+					WHERE DIA >= '{start}' AND DIA <= '{end}'
+					GROUP BY NOME, DIA
+					ORDER BY DIA DESC,HORA DESC
+					''', self.conn)
+			else:
+				return pd.read_sql_query(f'''
+					SELECT [NOME], [DIA], [STATUS],
+						TIME(MAX(
+							MAX(coalesce(strftime('%s', ENTRADA), 0)),
+							MAX(coalesce(strftime('%s', SAIDA), 0))
+					   ), 'unixepoch') AS HORA
+					FROM log
+					WHERE NOME LIKE '%{name}%' AND DIA >= '{start}' AND DIA <= '{end}'
+					GROUP BY NOME, DIA
+					ORDER BY DIA DESC,HORA DESC
+					''', self.conn)
 
 	def timeDelta(self,date1,date2):
 		date1 = datetime.strptime(date1,r'%H:%M:%S')

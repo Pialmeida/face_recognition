@@ -149,10 +149,12 @@ class NameRegistration(QWidget):
 		#Success Timer
 		self.timer = QTimer(self)
 		self.timer.timeout.connect(self.registration_success)
+		self.timer.setSingleShot(True)
 
 		#Failure Timer
 		self.timer2 = QTimer(self)
 		self.timer2.timeout.connect(lambda: self.killWindow.emit())
+		self.timer2.setSingleShot(True)
 
 
 	def on_click1(self):

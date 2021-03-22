@@ -168,6 +168,7 @@ class NameDeregistration(QWidget):
 		#Success Timer
 		self.timer = QTimer(self)
 		self.timer.timeout.connect(self.deregistration_success)
+		self.timer.setSingleShot(True)
 
 
 	def on_click1(self):

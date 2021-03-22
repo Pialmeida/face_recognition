@@ -26,11 +26,17 @@
 		- ~~Add lookup of user~~
 		- ~~Add prevention of invalid name~~
 	- Add auto-updating log of entry
-		- Add auto-save functionality
+		- ~~Add data update~~
 		- Add to excel button
 		- Add generate report button
 	- Add filter mechanism for data lookup
-		- Add name filter
+		- ~~Add name filter~~
 		- Add date filter
+			- Add check for valid date range
+			- Fix date comparison problem
 		- Add status filter
+	- Add data modifying functionality
+		- Add deletion of rows
+		- Add entry modification
+		- Add filtered deletion
 
