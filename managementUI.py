@@ -92,7 +92,13 @@ class MainWindow(QWidget):
 
 		self._TEXT_LABEL_LAYOUT = '''
 			QLabel{
-				background-color: pink;
+				font: bold 14px;
+				color: black;
+			}
+		'''
+
+		self._CHECK_BOX_LAYOUT = '''
+			QCheckBox{
 				font: bold 14px;
 				color: black;
 			}
@@ -120,13 +126,15 @@ class MainWindow(QWidget):
 		self.layout.setContentsMargins(5,5,5,5)
 		self.setLayout(self.layout)
 
+
 		#Left Side
 		self.left_layout = QVBoxLayout()
 		self.layout.addLayout(self.left_layout)
 
 		self.label = QLabel(self)
 		self.left_layout.addWidget(self.label)
-		self.label.setStyleSheet("QLabel { background-color : blue;}")
+		self.label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+		self.label.setMinimumWidth(int(self.width*0.58))
 
 		#Log Layout
 		self.log_layout = QVBoxLayout()
@@ -189,7 +197,7 @@ class MainWindow(QWidget):
 		#Add Filter Section Layout
 		self.label3 = QLabel(self)
 		self.right_layout.addWidget(self.label3, int(self.height*0.3))
-		self.label3.setStyleSheet("QLabel { background-color : yellow;}")
+		# self.label3.setStyleSheet("QLabel { background-color : yellow;}")
 		self.search_layout = QVBoxLayout()
 		self.label3.setLayout(self.search_layout)
 		self.search_layout.setContentsMargins(0, 0, 0, 0)
@@ -203,61 +211,23 @@ class MainWindow(QWidget):
 		self.label4.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
 		self.label4.setText('FILTER')
 
-
-		#Date
+		#ComboBox for Search
 		self.label5 = QLabel(self)
 		self.label5.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 		self.label5.setMinimumHeight(int(self.height*0.05))
 		self.search_layout.addWidget(self.label5)
 
-		#Date Layout
-		self.date_layout = QHBoxLayout()
-		self.label5.setLayout(self.date_layout)
-		self.date_layout.setContentsMargins(3, 0, 3, 0)
-
-		#Date From Label
-		self.label6 = QLabel(self)
-		self.date_layout.addWidget(self.label6)
-		self.label6.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label6.setText('From: ')
-		self.label6.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
-
-		#From Data Select
-		self.datefrom = QDateEdit(self)
-		self.datefrom.setDate(QDate((self.now - timedelta(30)).year, (self.now - timedelta(30)).month, (self.now - timedelta(30)).day))
-		self.date_layout.addWidget(self.datefrom)
-		self.datefrom.setStyleSheet(self._DATEEDIT_LAYOUT)
-
-		#Date To Label
-		self.label7 = QLabel(self)
-		self.date_layout.addWidget(self.label7)
-		self.label7.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label7.setText('To: ')
-		self.label7.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
-
-		#Date to Select
-		self.dateto = QDateEdit(self)
-		self.dateto.setDate(QDate(self.now.year, self.now.month, self.now.day))
-		self.date_layout.addWidget(self.dateto)
-		self.dateto.setStyleSheet(self._DATEEDIT_LAYOUT)
-
-		#ComboBox for Search
-		self.label8 = QLabel(self)
-		self.label8.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-		self.label8.setMinimumHeight(int(self.height*0.05))
-		self.search_layout.addWidget(self.label8)
-
 		#Layout for Control Buttons
 		self.combox_layout = QHBoxLayout()
-		self.label8.setLayout(self.combox_layout)
+		self.label5.setLayout(self.combox_layout)
 		self.combox_layout.setContentsMargins(3, 0, 3, 0)
 
 		#Label for Name
-		self.label9 = QLabel(self)
-		self.combox_layout.addWidget(self.label9)
-		self.label9.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label9.setText('Name: ')
-		self.label9.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+		self.label6 = QLabel(self)
+		self.combox_layout.addWidget(self.label6)
+		self.label6.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label6.setText('Name: ')
+		self.label6.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
 
 		#Combo Box to Put Names
 		self.combobox = ExtendedComboBox(self)
@@ -271,16 +241,114 @@ class MainWindow(QWidget):
 		[self.combobox.addItem(x) for x in self.data.getNames()['NOME'].tolist()]
 
 
-		#Filter Control Buttons
+		#Date
+		self.label7 = QLabel(self)
+		self.label7.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label7.setMinimumHeight(int(self.height*0.05))
+		self.search_layout.addWidget(self.label7)
+
+		#Date Layout
+		self.date_layout = QHBoxLayout()
+		self.label7.setLayout(self.date_layout)
+		self.date_layout.setContentsMargins(3, 0, 3, 0)
+
+		#Date From Label
+		self.label8 = QLabel(self)
+		self.date_layout.addWidget(self.label8)
+		self.label8.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label8.setText('From: ')
+		self.label8.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+
+		#From Data Select
+		self.datefrom = QDateEdit(self)
+		self.datefrom.setDate(QDate((self.now - timedelta(30)).year, (self.now - timedelta(30)).month, (self.now - timedelta(30)).day))
+		self.date_layout.addWidget(self.datefrom)
+		self.datefrom.setStyleSheet(self._DATEEDIT_LAYOUT)
+
+		#Date To Label
+		self.label9 = QLabel(self)
+		self.date_layout.addWidget(self.label9)
+		self.label9.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label9.setText('To: ')
+		self.label9.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+
+		#Date to Select
+		self.dateto = QDateEdit(self)
+		self.dateto.setDate(QDate(self.now.year, self.now.month, self.now.day))
+		self.date_layout.addWidget(self.dateto)
+		self.dateto.setStyleSheet(self._DATEEDIT_LAYOUT)
+
+
+		#Status Label
 		self.label10 = QLabel(self)
+		self.search_layout.addWidget(self.label10)
 		self.label10.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 		self.label10.setMinimumHeight(int(self.height*0.05))
-		self.search_layout.addWidget(self.label10, alignment = Qt.AlignBottom)
+
+		#Status Layout
+		self.status_layout = QHBoxLayout()
+		self.label10.setLayout(self.status_layout)
+		self.status_layout.setContentsMargins(3, 0, 3, 0)
+
+		#Status Title
+		self.label11 = QLabel(self)
+		self.label11.setText('Status: ')
+		self.label11.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.status_layout.addWidget(self.label11)
+
+		#Checkboxes
+		self.check = QCheckBox('IN')
+		self.check2 = QCheckBox('OUT')
+		self.status_layout.addWidget(self.check)
+		self.status_layout.addWidget(self.check2)
+		self.check.setStyleSheet(self._CHECK_BOX_LAYOUT)
+		self.check2.setStyleSheet(self._CHECK_BOX_LAYOUT)
+		self.check.setChecked(True)
+		self.check2.setChecked(True)
+
+
+		#Hour Label
+		self.label12 = QLabel(self)
+		self.search_layout.addWidget(self.label12)
+		self.label12.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label12.setMinimumHeight(int(self.height*0.05))
+
+		#Hour Layout
+		self.hour_layout = QHBoxLayout()
+		self.label12.setLayout(self.hour_layout)
+		self.hour_layout.setContentsMargins(3, 0, 3, 0)
+
+		#Hour Title
+		self.label13 = QLabel(self)
+		self.label13.setText('Hour: ')
+		self.label13.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.hour_layout.addWidget(self.label13)
+
+		#Checkboxes
+		self.check3 = QCheckBox('OVER')
+		self.check4 = QCheckBox('UNDER')
+		self.check5 = QCheckBox('NONE')
+		self.hour_layout.addWidget(self.check3)
+		self.hour_layout.addWidget(self.check4)
+		self.hour_layout.addWidget(self.check5)
+		self.check3.setStyleSheet(self._CHECK_BOX_LAYOUT)
+		self.check4.setStyleSheet(self._CHECK_BOX_LAYOUT)
+		self.check5.setStyleSheet(self._CHECK_BOX_LAYOUT)
+		self.check3.setChecked(True)
+		self.check4.setChecked(True)
+		self.check5.setChecked(True)
+
+		#Filter Control Buttons
+		self.label15 = QLabel(self)
+		self.label15.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label15.setMinimumHeight(int(self.height*0.05))
+		self.search_layout.addWidget(self.label15, alignment = Qt.AlignBottom)
 
 		#Layout for Control Buttons
 		self.filter_control_layout = QHBoxLayout()
-		self.label10.setLayout(self.filter_control_layout)
+		self.label15.setLayout(self.filter_control_layout)
 		self.filter_control_layout.setContentsMargins(0, 0, 0, 0)
+
 
 		#Search Button
 		self.button3 = QPushButton('SEARCH', self)
@@ -299,34 +367,37 @@ class MainWindow(QWidget):
 		self.button4.clicked.connect(self.on_click4)
 
 		#Business Stuff
-		self.label11 = QLabel(self)
-		self.right_layout.addWidget(self.label11)
-		self.label11.setAlignment(Qt.AlignRight  | Qt.AlignBottom)
-		self.label11.setStyleSheet("QLabel{background-color: purple;}")
-		self.label11.setPixmap(QPixmap(self._PATH_TO_LOGO).scaled(int(self.width*0.45), int(self.height*0.2), Qt.KeepAspectRatio))
+		self.label16 = QLabel(self)
+		self.right_layout.addWidget(self.label16)
+		self.label16.setAlignment(Qt.AlignRight  | Qt.AlignBottom)
+		self.label16.setPixmap(QPixmap(self._PATH_TO_LOGO).scaled(int(self.width*0.4025), int(self.height), Qt.KeepAspectRatio))
 
 
 		#Log Managing Layout
-		self.label12 = QLabel(self)
-		self.left_layout.addWidget(self.label12)
-		self.label12.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-		self.label12.setMinimumHeight(int(self.height*0.05))
+		self.label17 = QLabel(self)
+		self.left_layout.addWidget(self.label17)
+		self.label17.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label17.setMinimumHeight(int(self.height*0.05))
 
 		self.logman_layout = QHBoxLayout()
-		self.label12.setLayout(self.logman_layout)
+		self.label17.setLayout(self.logman_layout)
 		self.logman_layout.setContentsMargins(0, 0, 0, 0)
 
 		#To excel
 		self.button5 = QPushButton('TO EXCEL', self)
+		self.button5.setToolTip('Press to generate excel file with current filter')
 		self.logman_layout.addWidget(self.button5)
 		self.button5.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button5.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+		self.button5.clicked.connect(self.on_click5)
 
 		#Generate monthly report
 		self.button6 = QPushButton('MONTHLY REPORT', self)
+		self.button6.setToolTip('Press to monthly report excel file')
 		self.logman_layout.addWidget(self.button6)
 		self.button6.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button6.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+		self.button6.clicked.connect(self.on_click6)
 
 
 		self.show() 
@@ -336,7 +407,7 @@ class MainWindow(QWidget):
 		self.table_model = Table(data)
 		self.log.setModel(self.table_model)
 
-
+	#Register Button
 	def on_click1(self):
 		self.registerWindow = RegisterWindow()
 		self.registerWindow.killWindow.connect(self._del_register_window)
@@ -356,20 +427,12 @@ class MainWindow(QWidget):
 				path2 = path.replace('temp', name)
 				os.rename(path, path2)
 
-
+	#Remove Button
 	def on_click2(self):
 		self.nameEntry = NameDeregistration()
 		self.nameEntry.killWindow.connect(self._del_name_entry)
 		self.nameEntry.nameEntered.connect(self._name_entered)
 		self.nameEntry.show()
-
-	def on_click3(self):
-		self.filter['date'] = [self.datefrom.date().toString('dd/MM/yyyy'), self.dateto.date().toString('dd/MM/yyyy')]
-		self.filter['name'] = self.combobox.currentText()
-		self.updateLog()
-
-	def on_click4(self):
-		pass
 
 	def _del_name_entry(self):
 		self.nameEntry.close()
@@ -381,8 +444,68 @@ class MainWindow(QWidget):
 				path = os.path.join(self._PATH_TO_PICS, file)
 				os.remove(path)
 
+	#Filter Search
+	def on_click3(self):
+		if self.dateto.date() > QDate(self.now):
+			print('yes')
+		if self.datefrom.date() > self.dateto.date():
+			print('yes2')
+
+
+		self.filter['date'] = [self.datefrom.date().toString('yyyy/MM/dd'), self.dateto.date().toString('yyyy/MM/dd')]
+		self.filter['name'] = self.combobox.currentText()
+
+		if self.check.isChecked() and self.check2.isChecked():
+			self.filter['status'] = 0
+		elif not self.check.isChecked() and self.check2.isChecked():
+			self.filter['status'] = 1
+		elif self.check.isChecked() and not self.check2.isChecked():
+			self.filter['status'] = 2
+		elif not self.check.isChecked() and not self.check2.isChecked():
+			self.filter['status'] = 3
+
+		if self.check3.isChecked() and self.check4.isChecked() and self.check5.isChecked():
+			self.filter['hour'] = 0
+		elif not self.check3.isChecked() and self.check4.isChecked() and self.check5.isChecked():
+			self.filter['hour'] = 1
+		elif self.check3.isChecked() and not self.check4.isChecked() and self.check5.isChecked():
+			self.filter['hour'] = 2
+		elif not self.check3.isChecked() and not self.check4.isChecked() and self.check5.isChecked():
+			self.filter['hour'] = 3
+		elif self.check3.isChecked() and self.check4.isChecked() and not self.check5.isChecked():
+			self.filter['hour'] = 4
+		elif not self.check3.isChecked() and self.check4.isChecked() and not self.check5.isChecked():
+			self.filter['hour'] = 5
+		elif self.check3.isChecked() and not self.check4.isChecked() and not self.check5.isChecked():
+			self.filter['hour'] = 6
+		elif not self.check3.isChecked() and not self.check4.isChecked() and notself.check5.isChecked():
+			self.filter['hour'] = 7
+
+		self.updateLog()
+
+	#Filter Clear
+	def on_click4(self):
+		self.datefrom.setDate(QDate((self.now - timedelta(30)).year, (self.now - timedelta(30)).month, (self.now - timedelta(30)).day))
+		self.dateto.setDate(QDate(self.now.year, self.now.month, self.now.day))
+		self.combobox.setCurrentText('')
+		self.filter = {}
+		self.updateLog()
+
+
+	#To Excel
+	def on_click5(self):
+		path = os.path.join(os.path.dirname(__file__), 'report')
+		if not os.path.isdir(os.path.join(path)):
+			os.mkdir('report')
+		self.data.toExcel(path, self.filter)
+
+
+	def on_click6(self):
+		print('test')
+
+
 	def closeEvent(self, event):
-		pass
+		self.data.close()
 
 
 if __name__ == '__main__':

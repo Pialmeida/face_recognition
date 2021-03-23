@@ -7,7 +7,7 @@
 	},
 	"UI": {
 		"LOG_LENGTH": 15,
-		"REFRESH_TIME": 60,
+		"REFRESH_TIME": 300,
 		"UI_WIDTH": 852,
 		"UI_HEIGHT": 480
 	},
@@ -29,5 +29,9 @@
 	"PATH": {
 		"PICS": "C:\\Users\\Akaer\\Desktop\\Biometric\\face_recognition\\known_people",
 		"DATA": "C:\\Users\\Akaer\\Desktop\\Biometric\\face_recognition\\data\\data.db"
+	},
+	"REPORT":{
+		"START": 21,
+		"END": 20
 	}
 }

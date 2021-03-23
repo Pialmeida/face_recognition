@@ -6,9 +6,18 @@ from PyQt5.QtGui import *
 import sys, time, datetime, os
 import cv2
 import pandas as pd
+import json
 
 import sqlite3
 import random
+
+if __name__ == '__main__':
+	sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+_PATH = os.path.dirname(os.path.dirname(__file__))
+
+with open(os.path.join(_PATH,'config.json'),'r') as f:
+		CONFIG = json.load(f)
 
 class MyTable(QTableView):
 	def __init__(self, model, parent = None):
@@ -16,20 +25,30 @@ class MyTable(QTableView):
  
 		rowHeight = self.fontMetrics().height()
 		self.verticalHeader().setDefaultSectionSize(rowHeight)
+		self.verticalHeader().setVisible(False)
+		self.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
 		self.setModel(model)
+
+		self.horizontalHeader().setStretchLastSection(True)
  
 	def resizeEvent(self, event):
 		width = event.size().width()
-		self.setColumnWidth(0, width * 0.30)
-		self.setColumnWidth(1, width * 0.25)
+		self.setColumnWidth(0, width * 0.12)
+		self.setColumnWidth(1, width * 0.33)
 		self.setColumnWidth(2, width * 0.15)
-		self.setColumnWidth(3, width * 0.30)
+		self.setColumnWidth(3, width * 0.12)
+		self.setColumnWidth(4, width * 0.18)
+
+		# height = event.size().height()
+		# for i in range(CONFIG['UI']['LOG_LENGTH']):
+		# 	self.setRowHeight(i, height/CONFIG['UI']['LOG_LENGTH'])
 
 
 class Table(QAbstractTableModel):
 	def __init__(self, data = []):
 		super(Table, self).__init__()
 		self._data = data
+		self.roles = []
 
 	def data(self, index, role):
 		if role == Qt.DisplayRole:

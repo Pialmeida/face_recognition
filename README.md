@@ -1,6 +1,8 @@
 # face_recognition
 
 ### TO DO:
+- HORAS TRABALHADAS double leading zero
+
 - Create Raspberry Pi front-end UI
 	- ~~Add camera thread to UI~~
 	- ~~Add background data management~~
@@ -27,14 +29,14 @@
 		- ~~Add prevention of invalid name~~
 	- Add auto-updating log of entry
 		- ~~Add data update~~
-		- Add to excel button
+		- ~~Add to excel button~~
 		- Add generate report button
 	- Add filter mechanism for data lookup
 		- ~~Add name filter~~
-		- Add date filter
-			- Add check for valid date range
-			- Fix date comparison problem
-		- Add status filter
+		- ~~Add date filter~~
+			- ~~Add check for valid date range~~
+		- ~~Add status filter~~
+		- Add filter for hours worked
 	- Add data modifying functionality
 		- Add deletion of rows
 		- Add entry modification

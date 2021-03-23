@@ -1,6 +1,6 @@
 import os, sqlite3, json
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 
 if __name__ == '__main__':
@@ -25,6 +25,8 @@ class Data():
 		self._LUNCH_START = CONFIG['HOURS']['LUNCH_START']
 		self._LUNCH_END = CONFIG['HOURS']['LUNCH_END']
 
+		self._DAILY_HOURS = str(self.timeDelta(self._DAY_START, self._DAY_END) - timedelta(hours=1))
+
 
 	def addEntry(self, name, now=datetime.now()):
 		today = now.strftime("%d/%m/%Y")
@@ -34,7 +36,7 @@ class Data():
 		data = self.cursor.execute(f"SELECT * FROM log WHERE NOME = '{name}' AND DIA = '{today}'").fetchone()
 
 		if data is not None:
-			(_, _, _, IN1, OUT1, IN2, OUT2, _, _) = data
+			(_, _, _, IN1, OUT1, IN2, OUT2, _) = data
 	
 		if data is None:
 			print(f'{name} NOW IN')
@@ -70,7 +72,7 @@ class Data():
 		data = self.cursor.execute(f"SELECT * FROM log WHERE NOME = '{name}' AND DIA = '{today}'").fetchone()
 
 		if data is not None:
-			(_, DAY, _, IN1, OUT1, IN2, OUT2, _, _) = data
+			(_, DAY, _, IN1, OUT1, IN2, OUT2, _,) = data
 
 		# if IN1 is not None and now.day != datetime.strptime(DAY,r'%d/%m/%Y').day:
 		# 	print('testing')
@@ -99,52 +101,68 @@ class Data():
 		''', self.conn)
 
 	def getLog(self, _filter={}):
-		if _filter == {}:
-			return pd.read_sql_query(f'''
-				SELECT [NOME], [DIA], [STATUS],
-					TIME(MAX(
-						MAX(coalesce(strftime('%s', ENTRADA), 0)),
-						MAX(coalesce(strftime('%s', SAIDA), 0))
-					), 'unixepoch') AS HORA
-				FROM log
-				GROUP BY NOME, DIA
-				ORDER BY DIA DESC, HORA DESC
-				''', self.conn)
-		else:
-			name = _filter['name'].upper()
-			start = _filter['date'][0]
-			end = _filter['date'][1]
-
-			if name == '' or name == 'all':
-				return pd.read_sql_query(f'''
-					SELECT [NOME], [DIA], [STATUS],
-						TIME(MAX(
-							MAX(coalesce(strftime('%s', ENTRADA), 0)),
-							MAX(coalesce(strftime('%s', SAIDA), 0))
-					   ), 'unixepoch') AS HORA
-					FROM log
-					WHERE DIA >= '{start}' AND DIA <= '{end}'
-					GROUP BY NOME, DIA
-					ORDER BY DIA DESC,HORA DESC
-					''', self.conn)
-			else:
-				return pd.read_sql_query(f'''
-					SELECT [NOME], [DIA], [STATUS],
-						TIME(MAX(
-							MAX(coalesce(strftime('%s', ENTRADA), 0)),
-							MAX(coalesce(strftime('%s', SAIDA), 0))
-					   ), 'unixepoch') AS HORA
-					FROM log
-					WHERE NOME LIKE '%{name}%' AND DIA >= '{start}' AND DIA <= '{end}'
-					GROUP BY NOME, DIA
-					ORDER BY DIA DESC,HORA DESC
-					''', self.conn)
+		return pd.read_sql_query(self.getQuery(_filter), self.conn)
 
 	def timeDelta(self,date1,date2):
 		date1 = datetime.strptime(date1,r'%H:%M:%S')
 		date2 = datetime.strptime(date2,r'%H:%M:%S')
 
 		return (date2-date1)
+
+	def getQuery(self, _filter):
+		if _filter == {}:
+			out = ''
+		else:
+			conditions = []
+			if _filter['name'].upper() != '' and _filter['name'].upper() != 'ALL':
+				conditions.append(f"NOME LIKE '%{_filter['name'].upper()}%'")
+
+			conditions.append(f"(SUBSTR(DIA, 7, 4) || '/' || SUBSTR(DIA, 4, 2) || '/' || SUBSTR(DIA, 1, 2)) BETWEEN '{_filter['date'][0]}' and '{_filter['date'][1]}'")
+			
+			if _filter['status'] == 0:
+				pass
+			elif _filter['status'] == 1:
+				conditions.append(f"STATUS LIKE 'OUT'")
+			elif _filter['status'] == 2:
+				conditions.append(f"STATUS LIKE 'IN'")
+			elif _filter['status'] == 3:
+				conditions.append(f"STATUS LIKE 'INVALID'")
+
+			if _filter['hour'] == 0:
+				pass
+			elif _filter['hour'] == 1:
+				conditions.append(f"STATUS")
+			elif _filter['hour'] == 2:
+				pass
+			elif _filter['hour'] == 3:
+				conditions.append(f"[HORAS TRABALHADAS] IS NOT NULL")
+			elif _filter['hour'] == 4:
+				pass
+			elif _filter['hour'] == 5:
+				pass
+			elif _filter['hour'] == 6:
+				pass
+			elif _filter['hour'] == 7:
+				conditions.append(f"[HORAS TRABALHADAS] LIKE 'INVALID'")
+
+			out = "WHERE " + " AND ".join(conditions)
+
+
+		query = f'''
+				SELECT TIME(MAX(
+						MAX(coalesce(strftime('%s', ENTRADA), 0)),
+						MAX(coalesce(strftime('%s', SAIDA), 0)),
+						MAX(coalesce(strftime('%s', [ENTRADA ALMOCO]), 0)),
+						MAX(coalesce(strftime('%s', [SAIDA ALMOCO]), 0))
+				   ), 'unixepoch') AS HORA,
+				    [NOME], [DIA], [STATUS], [HORAS TRABALHADAS]
+				FROM log
+				{out}
+				GROUP BY NOME, DIA
+				ORDER BY DIA DESC,HORA DESC
+				LIMIT {CONFIG['UI']['LOG_LENGTH']}
+		'''
+		return query
 
 	def getMissing(self,date):
 		#date.strftime('%d/%m/%Y')
@@ -157,6 +175,10 @@ class Data():
 
 	def endDay(self):
 		return str(self.timeDelta(self._DAY_END, self._DAY_START) - self.timeDelta(self._LUNCH_START, self._LUNCH_END))
+
+	def toExcel(self, path, _filter):
+		name = f'{datetime.now().day}_{datetime.now().month}_report.xls'
+		self.getLog(_filter).to_excel(os.path.join(path,name), index=False)
 
 	def changeStatus(name, today, status):
 		pass
