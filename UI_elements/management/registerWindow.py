@@ -8,6 +8,7 @@ if __name__ == '__main__':
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 else:
 	sys.path.append(os.path.dirname(__file__))
+
 _PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 from datetime import datetime
@@ -39,8 +40,8 @@ class RegisterWindow(QMainWindow):
 		self.completed = False
 
 		self.title = 'Biometric Detection Register'
-		self.width = CONFIG['REGISTER_UI']['UI_WIDTH']
-		self.height = CONFIG['REGISTER_UI']['UI_HEIGHT']
+		self.width = CONFIG['DATA_MODIFICATION']['UI_WIDTH']
+		self.height = CONFIG['DATA_MODIFICATION']['UI_HEIGHT']
 
 		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
 

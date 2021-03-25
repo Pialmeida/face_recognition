@@ -1,8 +1,6 @@
 # face_recognition
 
 ### TO DO:
-- HORAS TRABALHADAS double leading zero
-
 - Create Raspberry Pi front-end UI
 	- ~~Add camera thread to UI~~
 	- ~~Add background data management~~
@@ -16,7 +14,8 @@
 	- ~~Add sensor to replace clickable button~~
 	- ~~Add multi-entry system compatibility~~
 	- Add auto-sender for individuals missing entries
-		- ~~Recognize users missing entries~~
+		- ~~Add recognition for users missing entries~~
+		- Add auto-sender for recognized users
 
 - Create front-end UI for Computer Access
 	- Add registering functionality
@@ -31,14 +30,14 @@
 		- ~~Add data update~~
 		- ~~Add to excel button~~
 		- Add generate report button
-	- Add filter mechanism for data lookup
+	- ~~Add filter mechanism for data lookup~~
 		- ~~Add name filter~~
 		- ~~Add date filter~~
 			- ~~Add check for valid date range~~
 		- ~~Add status filter~~
-		- Add filter for hours worked
-	- Add data modifying functionality
-		- Add deletion of rows
-		- Add entry modification
+		- ~~Add filter for hours worked~~
+	- Add data modifying functionality **
+		- Add deletion of rows *
+		- Add entry modification *
 		- Add filtered deletion
 

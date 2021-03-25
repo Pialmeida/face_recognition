@@ -269,6 +269,7 @@ class MainWindow(QWidget):
 
 	def on_click1(self):
 		self.data.removeLast(self._prev_name)
+		self._prev_name = None
 		self.button.setText('NOT YOU?')
 
 	def alertUser(self):

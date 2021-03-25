@@ -4,3 +4,4 @@ numpy
 playsound
 opencv-python
 sqlite3
+xlwt

@@ -97,6 +97,20 @@ class MainWindow(QWidget):
 			}
 		'''
 
+		self._TEXT_LABEL_LAYOUT_CONFIRM = '''
+			QLabel{
+				font: bold 14px;
+				color: green;
+			}
+		'''
+
+		self._TEXT_LABEL_LAYOUT_DENY = '''
+			QLabel{
+				font: bold 14px;
+				color: red;
+			}
+		'''
+
 		self._CHECK_BOX_LAYOUT = '''
 			QCheckBox{
 				font: bold 14px;
@@ -143,6 +157,9 @@ class MainWindow(QWidget):
 
 		#Table
 		self.table_model = Table(self.data.getLog())
+		self.table_model.dataChanged.connect(self.on_data_change)
+		self.table_model.invalidEntry.connect(self.invalidChange)
+		self.table_model.validEntry.connect(self.validChange)
 
 		self.log = MyTable(self.table_model)
 		self.log.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
@@ -197,7 +214,6 @@ class MainWindow(QWidget):
 		#Add Filter Section Layout
 		self.label3 = QLabel(self)
 		self.right_layout.addWidget(self.label3, int(self.height*0.3))
-		# self.label3.setStyleSheet("QLabel { background-color : yellow;}")
 		self.search_layout = QVBoxLayout()
 		self.label3.setLayout(self.search_layout)
 		self.search_layout.setContentsMargins(0, 0, 0, 0)
@@ -264,6 +280,7 @@ class MainWindow(QWidget):
 		self.datefrom.setDate(QDate((self.now - timedelta(30)).year, (self.now - timedelta(30)).month, (self.now - timedelta(30)).day))
 		self.date_layout.addWidget(self.datefrom)
 		self.datefrom.setStyleSheet(self._DATEEDIT_LAYOUT)
+		self.datefrom.setDisplayFormat('dd/MM/yyyy')
 
 		#Date To Label
 		self.label9 = QLabel(self)
@@ -277,6 +294,7 @@ class MainWindow(QWidget):
 		self.dateto.setDate(QDate(self.now.year, self.now.month, self.now.day))
 		self.date_layout.addWidget(self.dateto)
 		self.dateto.setStyleSheet(self._DATEEDIT_LAYOUT)
+		self.dateto.setDisplayFormat('dd/MM/yyyy')
 
 
 		#Status Label
@@ -327,7 +345,7 @@ class MainWindow(QWidget):
 		#Checkboxes
 		self.check3 = QCheckBox('OVER')
 		self.check4 = QCheckBox('UNDER')
-		self.check5 = QCheckBox('NONE')
+		self.check5 = QCheckBox('NULL')
 		self.hour_layout.addWidget(self.check3)
 		self.hour_layout.addWidget(self.check4)
 		self.hour_layout.addWidget(self.check5)
@@ -338,11 +356,21 @@ class MainWindow(QWidget):
 		self.check4.setChecked(True)
 		self.check5.setChecked(True)
 
+
+		#Warnings Label
+		self.label14 = QLabel(self)
+		self.search_layout.addWidget(self.label14, alignment = Qt.AlignBottom)
+		self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label14.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label14.setMinimumHeight(int(self.height*0.05))
+		self.label14.setAlignment(Qt.AlignVCenter | Qt.AlignHCenter)
+
+
 		#Filter Control Buttons
 		self.label15 = QLabel(self)
 		self.label15.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 		self.label15.setMinimumHeight(int(self.height*0.05))
-		self.search_layout.addWidget(self.label15, alignment = Qt.AlignBottom)
+		self.right_layout.addWidget(self.label15)
 
 		#Layout for Control Buttons
 		self.filter_control_layout = QHBoxLayout()
@@ -366,38 +394,58 @@ class MainWindow(QWidget):
 		self.button4.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button4.clicked.connect(self.on_click4)
 
-		#Business Stuff
+
+		#Editing Window
 		self.label16 = QLabel(self)
 		self.right_layout.addWidget(self.label16)
-		self.label16.setAlignment(Qt.AlignRight  | Qt.AlignBottom)
-		self.label16.setPixmap(QPixmap(self._PATH_TO_LOGO).scaled(int(self.width*0.4025), int(self.height), Qt.KeepAspectRatio))
+		self.label16.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label16.setMinimumHeight(int(self.height*0.1))
+		
+		#Layout for Button
+		self.edit_layout = QHBoxLayout()
+		self.label16.setLayout(self.edit_layout)
+		self.edit_layout.setContentsMargins(0, 0, 0, 0)
+
+		#Button for Editing
+		self.button5 = QPushButton('EDIT ENTRIES',self)
+		self.edit_layout.addWidget(self.button5)
+		self.button5.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+		self.button5.setToolTip('Press to edit database entries')
+		self.button5.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button5.clicked.connect(self.on_click5)
+
+		#Business Stuff
+		self.label17 = QLabel(self)
+		self.right_layout.addWidget(self.label17)
+		self.label17.setAlignment(Qt.AlignRight  | Qt.AlignBottom)
+		self.label17.setPixmap(QPixmap(self._PATH_TO_LOGO).scaled(int(self.width*0.4025), int(self.height), Qt.KeepAspectRatio))
 
 
 		#Log Managing Layout
-		self.label17 = QLabel(self)
-		self.left_layout.addWidget(self.label17)
-		self.label17.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-		self.label17.setMinimumHeight(int(self.height*0.05))
+		self.label18 = QLabel(self)
+		self.left_layout.addWidget(self.label18)
+		self.label18.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label18.setMinimumHeight(int(self.height*0.05))
 
 		self.logman_layout = QHBoxLayout()
-		self.label17.setLayout(self.logman_layout)
+		self.label18.setLayout(self.logman_layout)
 		self.logman_layout.setContentsMargins(0, 0, 0, 0)
 
 		#To excel
-		self.button5 = QPushButton('TO EXCEL', self)
-		self.button5.setToolTip('Press to generate excel file with current filter')
-		self.logman_layout.addWidget(self.button5)
-		self.button5.setStyleSheet(self._BUTTON_LAYOUT)
-		self.button5.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-		self.button5.clicked.connect(self.on_click5)
-
-		#Generate monthly report
-		self.button6 = QPushButton('MONTHLY REPORT', self)
-		self.button6.setToolTip('Press to monthly report excel file')
+		self.button6 = QPushButton('TO EXCEL', self)
+		self.button6.setToolTip('Press to generate excel file with current filter')
 		self.logman_layout.addWidget(self.button6)
 		self.button6.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button6.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 		self.button6.clicked.connect(self.on_click6)
+
+		#Generate monthly report
+		self.button7 = QPushButton('MONTHLY REPORT', self)
+		self.button7.setToolTip('Press to monthly report excel file')
+		self.logman_layout.addWidget(self.button7)
+		self.button7.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button7.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+		self.button7.clicked.connect(self.on_click7)
 
 
 		self.show() 
@@ -478,7 +526,7 @@ class MainWindow(QWidget):
 			self.filter['hour'] = 5
 		elif self.check3.isChecked() and not self.check4.isChecked() and not self.check5.isChecked():
 			self.filter['hour'] = 6
-		elif not self.check3.isChecked() and not self.check4.isChecked() and notself.check5.isChecked():
+		elif not self.check3.isChecked() and not self.check4.isChecked() and not self.check5.isChecked():
 			self.filter['hour'] = 7
 
 		self.updateLog()
@@ -492,17 +540,38 @@ class MainWindow(QWidget):
 		self.updateLog()
 
 
-	#To Excel
+	#Modify Database
 	def on_click5(self):
+		self.modifyWindow = RegisterWindow()
+		self.modifyWindow.killWindow.connect(self._del_modify_window)
+		self.modifyWindow.show()
+
+	def _del_modify_window(self):
+		self.modifyWindow.monitor.cap.close()
+		self.modifyWindow.close()
+
+
+	#To Excel
+	def on_click6(self):
 		path = os.path.join(os.path.dirname(__file__), 'report')
 		if not os.path.isdir(os.path.join(path)):
 			os.mkdir('report')
 		self.data.toExcel(path, self.filter)
 
-
-	def on_click6(self):
+	#Generate Monthly Report
+	def on_click7(self):
 		print('test')
 
+	#Keep
+	def on_data_change(self, i1, i2):
+		pass
+
+	def invalidChange(self, index, value):
+		self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
+		self.label14.setText(f'Error at {index.row()} {index.column()}')
+
+	def validChange(self, index, value):
+		self.label14.setText('')
 
 	def closeEvent(self, event):
 		self.data.close()
