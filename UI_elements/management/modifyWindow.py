@@ -404,7 +404,7 @@ class ModifyWindow(QWidget):
 	def on_click0(self):
 		index = self.log.selectionModel().selectedRows()[0]
 		data = [self.table_model.retrieve(index.row(), column) for column in range(self.table_model.columnCount(index))]
-		self.data.removeLast(data[0], now=datetime.strptime(data[1],r'%d/%m/%Y'))
+		self.data.removeLast(data[1], now=datetime.strptime(data[2],r'%d/%m/%Y'))
 		self.updateLog()
 
 	def on_click1(self): #Delete Row

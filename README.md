@@ -1,7 +1,7 @@
 # face_recognition
 
 ### TO DO:
-RESTRUCTURE DATABSE TO INCLUDE INDEX FOR MANIPULATION OF SINGLE DATA POINTS
+Add manager for indexes
 
 - Create Raspberry Pi front-end UI
 	- ~~Add camera thread to UI~~

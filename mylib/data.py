@@ -27,6 +27,8 @@ class Data():
 
 		self._DAILY_HOURS = self.stringDelta(str(self.timeDelta(self._LUNCH_START, self._LUNCH_END)), str(self.timeDelta(self._DAY_START, self._DAY_END)))
 
+		self.count = self.cursor.execute(f"SELECT COUNT(*) FROM log").fetchone()[0] + 1
+
 	def addEntry(self, name, now=datetime.now()):
 		today = now.strftime("%d/%m/%Y")
 
@@ -35,12 +37,14 @@ class Data():
 		data = self.cursor.execute(f"SELECT * FROM log WHERE NOME = '{name}' AND DIA = '{today}'").fetchone()
 
 		if data is not None:
-			(_, _, _, IN1, OUT1, IN2, OUT2, _) = data
+			(_, _, _, _, IN1, OUT1, IN2, OUT2, _) = data
 	
 		if data is None:
 			print(f'{name} NOW IN')
-			self.cursor.execute(f"INSERT INTO log(NOME, DIA, STATUS, ENTRADA) VALUES('{name}', '{today}' , 'IN', '{time}')")
+			print(f"INSERT INTO log(IDX, NOME, DIA, STATUS, ENTRADA) VALUES('{str(self.count)}', '{name}', '{today}' , 'IN', '{time}')")
+			self.cursor.execute(f"INSERT INTO log(IDX, NOME, DIA, STATUS, ENTRADA) VALUES('{str(self.count)}', '{name}', '{today}' , 'IN', '{time}')")
 			self.conn.commit()
+			self.count += 1
 			return 'ENTRADA'
 
 		elif IN1 is not None and OUT1 is None and IN2 is None and OUT2 is None:
@@ -74,7 +78,7 @@ class Data():
 		data = self.cursor.execute(f"SELECT * FROM log WHERE NOME = '{name}' AND DIA = '{today}'").fetchone()
 
 		if data is not None:
-			(_, DAY, _, IN1, OUT1, IN2, OUT2, _,) = data
+			(IDX, _, DAY, _, IN1, OUT1, IN2, OUT2, _,) = data
 
 
 		if IN1 is not None and OUT1 is not None and IN2 is not None and OUT2 is not None: #ALL Entries
@@ -87,8 +91,9 @@ class Data():
 			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', [HORAS TRABALHADAS] = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NOT NULL")
 			self.conn.commit()
 		elif IN1 is not None and OUT1 is None and IN2 is None and OUT2 is None:
-			self.cursor.execute(f"DELETE FROM log WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL")
+			self.cursor.execute(f"DELETE FROM log WHERE [IDX] = '{IDX}' AND NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL")
 			self.conn.commit()
+			self.count -= 1
 
 		print(f'\n\n\n{name} rolled back!\n\n\n')
 
@@ -205,14 +210,15 @@ class Data():
 			else:
 				out = ''
 
-			print(_filter)
-
 			query = f'''
-						SELECT [NOME], [DIA], [STATUS], [ENTRADA], [SAIDA], [ENTRADA ALMOCO] AS [ALMOCO IN], [SAIDA ALMOCO] AS [ALMOCO OUT], [HORAS TRABALHADAS] AS [HORAS]
+						SELECT [IDX] AS IDX, [NOME], [DIA], [STATUS], [ENTRADA], [SAIDA], [ENTRADA ALMOCO] AS [ALMOCO IN], [SAIDA ALMOCO] AS [ALMOCO OUT], [HORAS TRABALHADAS] AS [HORAS]
 						FROM log
 						{out}
 						ORDER BY DIA DESC
 				'''
+
+			print(query)
+
 			return query
 
 
@@ -248,26 +254,26 @@ class Data():
 
 	def modifyData(self, index, value, data):
 
-		if index.column() == 0:
+		if index.column() == 1:
 			out = f"SET [NOME] = '{value}'"
-		elif index.column() == 1:
-			out = f"SET [DIA] = '{value}'"
 		elif index.column() == 2:
-			out = f"SET [STATUS] = '{value}'"
+			out = f"SET [DIA] = '{value}'"
 		elif index.column() == 3:
-			out = f"SET [ENTRADA] = '{value}'"
+			out = f"SET [STATUS] = '{value}'"
 		elif index.column() == 4:
-			out = f"SET [SAIDA] = '{value}'"
+			out = f"SET [ENTRADA] = '{value}'"
 		elif index.column() == 5:
-			out = f"SET [ENTRADA ALMOCO] = '{value}'"
+			out = f"SET [SAIDA] = '{value}'"
 		elif index.column() == 6:
-			out = f"SET [SAIDA ALMOCO] = '{value}'"
+			out = f"SET [ENTRADA ALMOCO] = '{value}'"
 		elif index.column() == 7:
+			out = f"SET [SAIDA ALMOCO] = '{value}'"
+		elif index.column() == 8:
 			return
 
 		#Change None Values to Null
 		conditions = []
-		_map = {0: '[NOME]', 1: '[DIA]', 2: '[STATUS]', 3: '[ENTRADA]', 4: '[SAIDA]', 5: '[ENTRADA ALMOCO]', 6: '[SAIDA ALMOCO]', 7: '[HORAS TRABALHADAS]'}
+		_map = {0: '[IDX]', 1: '[NOME]', 2: '[DIA]', 3: '[STATUS]', 4: '[ENTRADA]', 5: '[SAIDA]', 6: '[ENTRADA ALMOCO]', 7: '[SAIDA ALMOCO]', 8: '[HORAS TRABALHADAS]'}
 		for i in range(len(data)):
 			if data[i] == None:
 				conditions.append(f"{_map.get(i)} IS NULL")
@@ -292,7 +298,7 @@ class Data():
 	def deleteRow(self, index, data):
 		#Change None Values to Null
 		conditions = []
-		_map = {0: '[NOME]', 1: '[DIA]', 2: '[STATUS]', 3: '[ENTRADA]', 4: '[SAIDA]', 5: '[ENTRADA ALMOCO]', 6: '[SAIDA ALMOCO]', 7: '[HORAS TRABALHADAS]'}
+		_map = {0: '[IDX]', 1: '[NOME]', 2: '[DIA]', 3: '[STATUS]', 4: '[ENTRADA]', 5: '[SAIDA]', 6: '[ENTRADA ALMOCO]', 7: '[SAIDA ALMOCO]', 8: '[HORAS TRABALHADAS]'}
 		for i in range(len(data)):
 			if data[i] == None:
 				conditions.append(f"{_map.get(i)} IS NULL")
@@ -305,6 +311,8 @@ class Data():
 		DELETE FROM log
 		{out}
 		'''
+
+		self.count -= 1
 
 		print(query)
 

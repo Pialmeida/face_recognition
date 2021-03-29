@@ -144,14 +144,15 @@ class ModifyMyTable(QTableView):
  
 	def resizeEvent(self, event):
 		width = event.size().width()
-		self.setColumnWidth(0, width * 0.25)
-		self.setColumnWidth(1, width * 0.10)
-		self.setColumnWidth(2, width * 0.07)
-		self.setColumnWidth(3, width * 0.11)
+		self.setColumnWidth(0, width * 0.02)
+		self.setColumnWidth(1, width * 0.21)
+		self.setColumnWidth(2, width * 0.10)
+		self.setColumnWidth(3, width * 0.08)
 		self.setColumnWidth(4, width * 0.11)
-		self.setColumnWidth(5, width * 0.13)
+		self.setColumnWidth(5, width * 0.11)
 		self.setColumnWidth(6, width * 0.13)
-		self.setColumnWidth(7, width * 0.10)
+		self.setColumnWidth(7, width * 0.13)
+		self.setColumnWidth(8, width * 0.08)
 
 		# height = event.size().height()
 		# for i in range(CONFIG['UI']['LOG_LENGTH']):
@@ -202,16 +203,16 @@ class ModifyTable(QAbstractTableModel):
 		return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
 
 	def dataValidation(self, index, value):
-		if index.column() == 0 and re.fullmatch(r'[A-Za-z ]+', value):
+		if index.column() == 0 and re.fullmatch(r'\d+', value):
 			self.validEntry.emit(index, value)
 			return True
-		elif index.column() == 1 and re.fullmatch(r'\d{2}\/\d{2}\/\d{4}', value):
+		elif index.column() == 1 and re.fullmatch(r'[A-Za-z ]+', value):
 			self.validEntry.emit(index, value)
 			return True
-		elif index.column() == 2 and value.upper() in ['IN', 'OUT']:
+		elif index.column() == 2 and re.fullmatch(r'\d{2}\/\d{2}\/\d{4}', value):
 			self.validEntry.emit(index, value)
 			return True
-		elif index.column() == 3 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
+		elif index.column() == 3 and value.upper() in ['IN', 'OUT']:
 			self.validEntry.emit(index, value)
 			return True
 		elif index.column() == 4 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
@@ -224,6 +225,9 @@ class ModifyTable(QAbstractTableModel):
 			self.validEntry.emit(index, value)
 			return True
 		elif index.column() == 7 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
+			self.validEntry.emit(index, value)
+			return True
+		elif index.column() == 8 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
 			self.validEntry.emit(index, value)
 			return True
 
@@ -231,14 +235,14 @@ class ModifyTable(QAbstractTableModel):
 		return False
 
 	def getChangedValue(self, index, value):
-		if index.column() == 0 and re.fullmatch(r'[A-Za-z ]+', value):
-			return value.upper()
-		elif index.column() == 1 and re.fullmatch(r'\d{2}\/\d{2}\/\d{4}', value):
+		if index.column() == 0 and re.fullmatch(r'\d+', value):
 			return value
-		elif index.column() == 2 and value.upper() in ['IN', 'OUT']:
+		elif index.column() == 1 and re.fullmatch(r'[A-Za-z ]+', value):
 			return value.upper()
-		elif index.column() == 3 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
+		elif index.column() == 2 and re.fullmatch(r'\d{2}\/\d{2}\/\d{4}', value):
 			return value
+		elif index.column() == 3 and value.upper() in ['IN', 'OUT']:
+			return value.upper()
 		elif index.column() == 4 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
 			return value
 		elif index.column() == 5 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
@@ -246,6 +250,8 @@ class ModifyTable(QAbstractTableModel):
 		elif index.column() == 6 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
 			return value
 		elif index.column() == 7 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
+			return value
+		elif index.column() == 8 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
 			return value
 
 
