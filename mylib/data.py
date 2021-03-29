@@ -100,8 +100,8 @@ class Data():
 			SELECT DISTINCT NOME FROM log
 		''', self.conn)
 
-	def getLog(self, _filter={}, log = True):
-		return pd.read_sql_query(self.getQuery(_filter, log = log), self.conn)
+	def getLog(self, _filter={}, raw = False, modify = False):
+		return pd.read_sql_query(self.getQuery(_filter, raw = raw, modify = modify), self.conn)
 
 	def stringDelta(self,date1,date2):
 		date1 = datetime.strptime(date1,r'%H:%M:%S')
@@ -133,61 +133,91 @@ class Data():
 
 		return (date2-date1)
 
-	def getQuery(self, _filter, log = True):
-		if _filter == {}:
-			out = ''
-		else:
-			conditions = []
-			if _filter['name'].upper() != '' and _filter['name'].upper() != 'ALL':
-				conditions.append(f"NOME LIKE '%{_filter['name'].upper()}%'")
+	def getQuery(self, _filter, raw = False, modify = False):
+		if not modify:
+			if not raw: # Display in Main Window
+				if _filter == {}:
+					out = ''
+				else:
+					conditions = []
+					if _filter['name'].upper() != '' and _filter['name'].upper() != 'ALL':
+						conditions.append(f"NOME LIKE '%{_filter['name'].upper()}%'")
 
-			conditions.append(f"(SUBSTR(DIA, 7, 4) || '/' || SUBSTR(DIA, 4, 2) || '/' || SUBSTR(DIA, 1, 2)) BETWEEN '{_filter['date'][0]}' and '{_filter['date'][1]}'")
-			
-			if _filter['status'] == 0:
-				pass
-			elif _filter['status'] == 1:
-				conditions.append(f"STATUS LIKE 'OUT'")
-			elif _filter['status'] == 2:
-				conditions.append(f"STATUS LIKE 'IN'")
-			elif _filter['status'] == 3:
-				conditions.append(f"STATUS LIKE 'INVALID'")
+					conditions.append(f"(SUBSTR(DIA, 7, 4) || '/' || SUBSTR(DIA, 4, 2) || '/' || SUBSTR(DIA, 1, 2)) BETWEEN '{_filter['date'][0]}' and '{_filter['date'][1]}'")
+					
+					if _filter['status'] == 0:
+						pass
+					elif _filter['status'] == 1:
+						conditions.append(f"STATUS LIKE 'OUT'")
+					elif _filter['status'] == 2:
+						conditions.append(f"STATUS LIKE 'IN'")
+					elif _filter['status'] == 3:
+						conditions.append(f"STATUS LIKE 'INVALID'")
 
-			if _filter['hour'] == 0:
-				pass
-			elif _filter['hour'] == 1:
-				conditions.append(f"(([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] < '{self._DAILY_HOURS}') OR [HORAS TRABALHADAS] IS NULL)")
-			elif _filter['hour'] == 2:
-				conditions.append(f"(([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] > '{self._DAILY_HOURS}') OR [HORAS TRABALHADAS] IS NULL)")
-			elif _filter['hour'] == 3:
-				conditions.append(f"[HORAS TRABALHADAS] IS NULL")
-			elif _filter['hour'] == 4:
-				conditions.append(f"[HORAS TRABALHADAS] IS NOT NULL")
-			elif _filter['hour'] == 5:
-				conditions.append(f"([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] < '{self._DAILY_HOURS}')")
-			elif _filter['hour'] == 6:
-				conditions.append(f"([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] > '{self._DAILY_HOURS}')")
-			elif _filter['hour'] == 7:
-				conditions.append(f"[HORAS TRABALHADAS] LIKE 'INVALID'")
+					if _filter['hour'] == 0:
+						pass
+					elif _filter['hour'] == 1:
+						conditions.append(f"(([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] < '{self._DAILY_HOURS}') OR [HORAS TRABALHADAS] IS NULL)")
+					elif _filter['hour'] == 2:
+						conditions.append(f"(([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] > '{self._DAILY_HOURS}') OR [HORAS TRABALHADAS] IS NULL)")
+					elif _filter['hour'] == 3:
+						conditions.append(f"[HORAS TRABALHADAS] IS NULL")
+					elif _filter['hour'] == 4:
+						conditions.append(f"[HORAS TRABALHADAS] IS NOT NULL")
+					elif _filter['hour'] == 5:
+						conditions.append(f"([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] < '{self._DAILY_HOURS}')")
+					elif _filter['hour'] == 6:
+						conditions.append(f"([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] > '{self._DAILY_HOURS}')")
+					elif _filter['hour'] == 7:
+						conditions.append(f"[HORAS TRABALHADAS] LIKE 'INVALID'")
 
-			out = "WHERE " + " AND ".join(conditions)
+					out = "WHERE " + " AND ".join(conditions)
 
-		if log is True:
+				query = f'''
+						SELECT TIME(MAX(
+								MAX(coalesce(strftime('%s', ENTRADA), 0)),
+								MAX(coalesce(strftime('%s', SAIDA), 0)),
+								MAX(coalesce(strftime('%s', [ENTRADA ALMOCO]), 0)),
+								MAX(coalesce(strftime('%s', [SAIDA ALMOCO]), 0))
+						   ), 'unixepoch') AS HORA,
+						    [NOME], [DIA], [STATUS], [HORAS TRABALHADAS]
+						FROM log
+						{out}
+						GROUP BY NOME, DIA
+						ORDER BY DIA DESC,HORA DESC
+						LIMIT {CONFIG['UI']['LOG_LENGTH']}
+				'''
+
+				return query
+			else: #To Excel
+
+				query = f'''
+						SELECT *
+						FROM log
+						{out}
+				'''
+				return query
+		
+
+		else: #Modify
+			if _filter == {}:
+				out = ''
+			else:
+				out = ''
+
+			print(_filter)
+
 			query = f'''
-					SELECT TIME(MAX(
-							MAX(coalesce(strftime('%s', ENTRADA), 0)),
-							MAX(coalesce(strftime('%s', SAIDA), 0)),
-							MAX(coalesce(strftime('%s', [ENTRADA ALMOCO]), 0)),
-							MAX(coalesce(strftime('%s', [SAIDA ALMOCO]), 0))
-					   ), 'unixepoch') AS HORA,
-					    [NOME], [DIA], [STATUS], [HORAS TRABALHADAS]
-					FROM log
-					{out}
-					GROUP BY NOME, DIA
-					ORDER BY DIA DESC,HORA DESC
-					LIMIT {CONFIG['UI']['LOG_LENGTH']}
-			'''
-		else:
-			query = f'''
+						SELECT [NOME], [DIA], [STATUS], [ENTRADA], [SAIDA], [ENTRADA ALMOCO] AS [ALMOCO IN], [SAIDA ALMOCO] AS [ALMOCO OUT], [HORAS TRABALHADAS] AS [HORAS]
+						FROM log
+						{out}
+						ORDER BY DIA DESC
+				'''
+			return query
+
+
+	def getModifyQuery(self, _filter):
+		query = f'''
 					SELECT *
 					FROM log
 					{out}
@@ -211,12 +241,13 @@ class Data():
 
 	def toExcel(self, path, _filter):
 		name = f'{datetime.now().day}_{datetime.now().month}_report.xlsx'
-		self.getLog(_filter, log = False).to_excel(os.path.join(path,name), index=False)
+		self.getLog(_filter, raw = True).to_excel(os.path.join(path,name), index=False)
 
 	def getReport(self,name):
 		pass
 
-	def modifyData(name, index, value, data):
+	def modifyData(self, index, value, data):
+
 		if index.column() == 0:
 			out = f"SET [NOME] = '{value}'"
 		elif index.column() == 1:
@@ -232,21 +263,53 @@ class Data():
 		elif index.column() == 6:
 			out = f"SET [SAIDA ALMOCO] = '{value}'"
 		elif index.column() == 7:
-			print('error')
+			return
+
+		#Change None Values to Null
+		conditions = []
+		_map = {0: '[NOME]', 1: '[DIA]', 2: '[STATUS]', 3: '[ENTRADA]', 4: '[SAIDA]', 5: '[ENTRADA ALMOCO]', 6: '[SAIDA ALMOCO]', 7: '[HORAS TRABALHADAS]'}
+		for i in range(len(data)):
+			if data[i] == None:
+				conditions.append(f"{_map.get(i)} IS NULL")
+			else:
+				conditions.append(f"{_map.get(i)} = '{data[i]}'")
+
+		out2 = "WHERE " + " AND ".join(conditions)
 
 		query = f'''
 		UPDATE log
 		{out}
-		WHERE [NOME] = '{data[0]}' AND 
-		[DIA] = '{data[1]}' AND 
-		[STATUS] = '{data[2]}' AND 
-		[ENTRADA] = '{data[3]}' AND 
-		[SAIDA] = '{data[4]}' AND 
-		[ENTRADA ALMOCO] = '{data[5]}' AND 
-		[SAIDA ALMOCO] = '{data[6]}' AND 
-		[HORAS TRABALHADAS] = '{data[7]}'
+		{out2}
 		'''
+
 		print(query)
+
+		self.cursor.execute(query)
+		self.conn.commit()
+
+		print('done')
+
+	def deleteRow(self, index, data):
+		#Change None Values to Null
+		conditions = []
+		_map = {0: '[NOME]', 1: '[DIA]', 2: '[STATUS]', 3: '[ENTRADA]', 4: '[SAIDA]', 5: '[ENTRADA ALMOCO]', 6: '[SAIDA ALMOCO]', 7: '[HORAS TRABALHADAS]'}
+		for i in range(len(data)):
+			if data[i] == None:
+				conditions.append(f"{_map.get(i)} IS NULL")
+			else:
+				conditions.append(f"{_map.get(i)} = '{data[i]}'")
+
+		out = "WHERE " + " AND ".join(conditions)
+
+		query = f'''
+		DELETE FROM log
+		{out}
+		'''
+
+		print(query)
+
+		self.cursor.execute(query)
+		self.conn.commit()
 
 	def close(self):
 		self.conn.close()

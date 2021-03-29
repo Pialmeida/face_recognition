@@ -144,14 +144,14 @@ class ModifyMyTable(QTableView):
  
 	def resizeEvent(self, event):
 		width = event.size().width()
-		self.setColumnWidth(0, width * 0.15)
+		self.setColumnWidth(0, width * 0.25)
 		self.setColumnWidth(1, width * 0.10)
-		self.setColumnWidth(2, width * 0.08)
-		self.setColumnWidth(3, width * 0.125)
-		self.setColumnWidth(4, width * 0.125)
-		self.setColumnWidth(5, width * 0.125)
-		self.setColumnWidth(6, width * 0.125)
-		self.setColumnWidth(7, width * 0.125)
+		self.setColumnWidth(2, width * 0.07)
+		self.setColumnWidth(3, width * 0.11)
+		self.setColumnWidth(4, width * 0.11)
+		self.setColumnWidth(5, width * 0.13)
+		self.setColumnWidth(6, width * 0.13)
+		self.setColumnWidth(7, width * 0.10)
 
 		# height = event.size().height()
 		# for i in range(CONFIG['UI']['LOG_LENGTH']):

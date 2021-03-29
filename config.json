@@ -31,8 +31,8 @@
 		"INTERVAL": 1
 	},
 	"PATH": {
-		"PICS": "D:\\Personal Projects\\face_recognition\\known_people",
-		"DATA": "D:\\Personal Projects\\face_recognition\\data\\data.db"
+		"PICS": "C:\\Users\\Akaer\\Desktop\\Biometric\\face_recognition\\known_people",
+		"DATA": "C:\\Users\\Akaer\\Desktop\\Biometric\\face_recognition\\data\\data.db"
 	},
 	"REPORT":{
 		"START": 21,

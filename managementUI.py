@@ -17,6 +17,7 @@ from mylib.table import MyTable, Table
 
 from UI_elements.management.registerWindow import RegisterWindow
 from UI_elements.management.nameDeregistration import NameDeregistration
+from UI_elements.management.modifyWindow import ModifyWindow
 
 with open('config.json','r') as f:
 	CONFIG = json.load(f)
@@ -450,11 +451,6 @@ class MainWindow(QWidget):
 
 		self.show() 
 
-	def updateLog(self):
-		data = self.data.getLog(self.filter)
-		self.table_model = Table(data)
-		self.log.setModel(self.table_model)
-
 	#Register Button
 	def on_click1(self):
 		self.registerWindow = RegisterWindow()
@@ -495,9 +491,13 @@ class MainWindow(QWidget):
 	#Filter Search
 	def on_click3(self):
 		if self.dateto.date() > QDate(self.now):
-			print('yes')
+			self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
+			self.label14.setText('DATE TO CANNOT BE AFTER TODAY')
+			return
 		if self.datefrom.date() > self.dateto.date():
-			print('yes2')
+			self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
+			self.label14.setText('DATE BEFORE CANNOT BE AFTER DATE TO')
+			return
 
 
 		self.filter['date'] = [self.datefrom.date().toString('yyyy/MM/dd'), self.dateto.date().toString('yyyy/MM/dd')]
@@ -531,6 +531,11 @@ class MainWindow(QWidget):
 
 		self.updateLog()
 
+	def updateLog(self):
+		data = self.data.getLog(self.filter)
+		self.table_model = Table(data)
+		self.log.setModel(self.table_model)
+
 	#Filter Clear
 	def on_click4(self):
 		self.datefrom.setDate(QDate((self.now - timedelta(30)).year, (self.now - timedelta(30)).month, (self.now - timedelta(30)).day))
@@ -542,13 +547,13 @@ class MainWindow(QWidget):
 
 	#Modify Database
 	def on_click5(self):
-		self.modifyWindow = RegisterWindow()
+		self.modifyWindow = ModifyWindow()
 		self.modifyWindow.killWindow.connect(self._del_modify_window)
 		self.modifyWindow.show()
 
 	def _del_modify_window(self):
-		self.modifyWindow.monitor.cap.close()
 		self.modifyWindow.close()
+		self.updateLog()
 
 
 	#To Excel

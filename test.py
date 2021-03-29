@@ -47,15 +47,6 @@
 # finally:
 
 
-from datetime import datetime, timedelta
+_map = {1: '[NOME]', 2: '[DIA]', 3: '[STATUS]', 4: '[ENTRADA]', 5: '[SAIDA]', 6: '[ENTRADA ALMOCO]', 7: '[SAIDA ALMOCO]', 8: '[HORAS TRABALHADAS]'}
 
-def day20(date):
-	if date.day >= 20:
-		print(datetime(date.year, date.month, 20))
-		return datetime(date.year, date.month, 20)
-	else:
-		print(datetime(date.year, date.month-1, 20))
-		return datetime(date.year, date.month-1, 20)
-
-
-day20(datetime.now() - timedelta(days=5))
+print(_map.get(1))
