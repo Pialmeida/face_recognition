@@ -92,6 +92,13 @@ class NameRegistration(QWidget):
 			}
 		'''
 
+		self._CHECK_BOX_LAYOUT = '''
+			QCheckBox{
+				font: bold 14px;
+				color: black;
+			}
+		'''
+
 		self.setupUI()
 
 
@@ -113,8 +120,8 @@ class NameRegistration(QWidget):
 
 		#Horizontal Layout
 		self.hlayout = QHBoxLayout()
+		self.hlayout.setContentsMargins(0, 0, 0, 0)
 		self.label.setLayout(self.hlayout)
-
 
 		#Name Title
 		self.label2 = QLabel(self)
@@ -127,24 +134,38 @@ class NameRegistration(QWidget):
 		self.line.setStyleSheet(self._LINE_EDIT_LAYOUT)
 		self.hlayout.addWidget(self.line)
 
-
+		#Check Box for Email
 		self.label3 = QLabel(self)
+		self.layout.addWidget(self.label3)
+
+		self.email_layout = QHBoxLayout()
+		self.email_layout.setAlignment(Qt.AlignCenter)
+		self.email_layout.setContentsMargins(0, 0, 0, 0)
+		self.label3.setLayout(self.email_layout)
+
+		self.check = QCheckBox('EMAIL ALERT', self)
+		self.email_layout.addWidget(self.check)
+		self.check.setStyleSheet(self._CHECK_BOX_LAYOUT)
+
+		#Label for Button
+		self.label4 = QLabel(self)
 		self.button_layout = QHBoxLayout()
-		self.label3.setLayout(self.button_layout)
+		self.button_layout.setContentsMargins(0, 0, 0, 0)
+		self.label4.setLayout(self.button_layout)
 
 		#Button to submit name
 		self.button = QPushButton('SUBMIT', self)
 		self.button_layout.addWidget(self.button)
 		self.button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-		self.layout.addWidget(self.label3)
+		self.layout.addWidget(self.label4)
 		self.button.clicked.connect(self.on_click1)
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
 
 		#Label for Success/Failure
-		self.label4 = QLabel(self)
-		self.layout.addWidget(self.label4)
-		self.label4.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-		self.label4.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
+		self.label5 = QLabel(self)
+		self.layout.addWidget(self.label5)
+		self.label5.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+		self.label5.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
 
 		#Success Timer
 		self.timer = QTimer(self)
@@ -169,7 +190,7 @@ class NameRegistration(QWidget):
 				self.timer2.start(1000)
 		else:
 			self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
-			self.label4.setText('UNSUCCESSUL REGISTRATION')
+			self.label4.setText('NAME ALREADY REGISTERED')
 
 	def registration_success(self):
 		self.completed = True
@@ -185,3 +206,11 @@ class NameRegistration(QWidget):
 					os.remove(path)
 
 		self.killWindow.emit()
+
+
+
+if __name__ == '__main__':
+	app = QApplication(sys.argv)
+	window = NameRegistration()
+	window.show()
+	sys.exit(app.exec_())

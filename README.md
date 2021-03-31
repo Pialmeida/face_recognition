@@ -1,8 +1,6 @@
 # face_recognition
 
 ### TO DO:
-Add manager for indexes
-
 - Create Raspberry Pi front-end UI
 	- ~~Add camera thread to UI~~
 	- ~~Add background data management~~
@@ -28,17 +26,17 @@ Add manager for indexes
 	- ~~Add removal functionality~~
 		- ~~Add lookup of user~~
 		- ~~Add prevention of invalid name~~
-	- Add auto-updating log of entry
+	- ~~Add auto-updating log of entry~~
 		- ~~Add data update~~
 		- ~~Add to excel button~~
-		- Add generate report button
+		- ~~Add generate report button~~
 	- ~~Add filter mechanism for data lookup~~
 		- ~~Add name filter~~
 		- ~~Add date filter~~
 			- ~~Add check for valid date range~~
 		- ~~Add status filter~~
 		- ~~Add filter for hours worked~~
-	- Add data modifying functionality **
+	- ~~Add data modifying functionality~~
 		- ~~Add entry modification~~
 		- ~~Add deletion of rows~~
 

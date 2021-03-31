@@ -47,6 +47,37 @@
 # finally:
 
 
-_map = {1: '[NOME]', 2: '[DIA]', 3: '[STATUS]', 4: '[ENTRADA]', 5: '[SAIDA]', 6: '[ENTRADA ALMOCO]', 7: '[SAIDA ALMOCO]', 8: '[HORAS TRABALHADAS]'}
+from datetime import datetime, timedelta
 
-print(_map.get(1))
+def getDate(d = datetime.now()):
+	if d.day <= 20:
+		if d.month == 1:
+			year_b1 = d.year - 1
+			year_b2 = d.year - 1
+			month_b1 = 11
+			month_b2 = 12
+		elif d.month == 2:
+			year_b1 = d.year - 1
+			year_b2 = d.year
+			month_b1 = 12
+			month_b2 = 1
+		else:
+			year_b1 = d.year 
+			year_b2 = d.year
+			month_b1 = d.month - 2
+			month_b2 = d.month - 1
+		return [datetime(year_b1, month_b1, 21).strftime("%Y/%m/%d"), datetime(year_b2, month_b2, 20).strftime("%Y/%m/%d")]
+	else:
+		if d.month == 1:
+			year_b1 = d.year - 1
+			year_b2 = d.year
+			month_b1 = 12
+			month_b2 = d.month
+		else:
+			year_b1 = d.year 
+			year_b2 = d.year
+			month_b1 = d.month - 1
+			month_b2 = d.month
+		return [datetime(year_b1, month_b1, 21).strftime("%Y/%m/%d"), datetime(year_b2, month_b2, 20).strftime("%Y/%m/%d")]
+
+print(getDate())

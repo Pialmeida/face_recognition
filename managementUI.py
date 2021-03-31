@@ -119,8 +119,6 @@ class MainWindow(QWidget):
 			}
 		'''
 
-		self._timer_counter = 0
-
 		self.now = datetime.now()
 
 		self.filter = {}
@@ -140,7 +138,6 @@ class MainWindow(QWidget):
 		self.layout = QHBoxLayout()
 		self.layout.setContentsMargins(5,5,5,5)
 		self.setLayout(self.layout)
-
 
 		#Left Side
 		self.left_layout = QVBoxLayout()
@@ -178,21 +175,37 @@ class MainWindow(QWidget):
 		self.layout.addLayout(self.right_layout)
 
 
-		#Add Button
-		#Add button box
-		self.label2 = QLabel(self)
-		self.right_layout.addWidget(self.label2, int(self.height*0.05))
+		#View Registered Names
+		self.label1 = QLabel(self)
+		self.right_layout.addWidget(self.label1, int(self.height*0.05))
 		self.button_layout = QVBoxLayout()
-		self.label2.setLayout(self.button_layout)
+		self.label1.setLayout(self.button_layout)
 
 		#Button
-		self.button = QPushButton('REGISTER', self)
+		self.button = QPushButton('VIEW REGISTERED NAMES', self)
 		self.button_layout.addWidget(self.button)
 		self.button_layout.setContentsMargins(0, 0, 0, 0)
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 		self.button.setToolTip('Press to register new individual')
-		self.button.clicked.connect(self.on_click1)
+		self.button.clicked.connect(self.on_click)
+
+
+		#Add Button
+		#Add button box
+		self.label2 = QLabel(self)
+		self.right_layout.addWidget(self.label2, int(self.height*0.05))
+		self.button1_layout = QVBoxLayout()
+		self.label2.setLayout(self.button1_layout)
+
+		#Button
+		self.button1 = QPushButton('REGISTER', self)
+		self.button1_layout.addWidget(self.button1)
+		self.button1_layout.setContentsMargins(0, 0, 0, 0)
+		self.button1.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button1.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+		self.button1.setToolTip('Press to register new individual')
+		self.button1.clicked.connect(self.on_click1)
 
 
 		#Remove Button
@@ -203,7 +216,7 @@ class MainWindow(QWidget):
 		self.label3.setLayout(self.button2_layout)
 
 		#Button
-		self.button2 = QPushButton('REMOVE', self)
+		self.button2 = QPushButton('DEREGISTER', self)
 		self.button2_layout.addWidget(self.button2)
 		self.button2_layout.setContentsMargins(0, 0, 0, 0)
 		self.button2.setStyleSheet(self._BUTTON_LAYOUT)
@@ -451,6 +464,16 @@ class MainWindow(QWidget):
 
 		self.show() 
 
+	#View Registered Names
+	def on_click(self):
+		self.nameList = QMainWindow()
+		self.nameList.setWindowTitle('Name List')
+		self.listwidget = QListWidget()
+		self.nameList.setCentralWidget(self.listwidget)
+		self.nameList.show()
+		[self.listwidget.addItem(x) for x in sorted(set([re.search('([\w ]+)_\d+.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]))]
+
+
 	#Register Button
 	def on_click1(self):
 		self.registerWindow = RegisterWindow()
@@ -561,13 +584,55 @@ class MainWindow(QWidget):
 		path = os.path.join(os.path.dirname(__file__), 'report')
 		if not os.path.isdir(os.path.join(path)):
 			os.mkdir('report')
-		self.data.toExcel(path, self.filter)
+		name = f'{datetime.now().day}_{datetime.now().month}_report.xlsx'
+		path = os.path.join(os.path.dirname(__file__), 'report', name)
+		self.data.toExcel(path, self.filter, 'excel')
 
 	#Generate Monthly Report
 	def on_click7(self):
-		print('test')
+		path = os.path.join(os.path.dirname(__file__), 'report')
+		if not os.path.isdir(os.path.join(path)):
+			os.mkdir('report')
+		name = f'{datetime.now().month}_report.xlsx'
+		path = os.path.join(os.path.dirname(__file__), 'report', name)
 
-	#Keep
+		_filter = {}
+		_filter['date'] = self.getMonthlyDate()
+		self.data.toExcel(path, _filter, 'month')
+
+
+	def getMonthlyDate(self, d = datetime.now()): #Get Monthly Report Date
+		if d.day <= 20:
+			if d.month == 1:
+				year_b1 = d.year - 1
+				year_b2 = d.year - 1
+				month_b1 = 11
+				month_b2 = 12
+			elif d.month == 2:
+				year_b1 = d.year - 1
+				year_b2 = d.year
+				month_b1 = 12
+				month_b2 = 1
+			else:
+				year_b1 = d.year 
+				year_b2 = d.year
+				month_b1 = d.month - 2
+				month_b2 = d.month - 1
+			return [datetime(year_b1, month_b1, CONFIG['REPORT']['END']).strftime("%Y/%m/%d"), datetime(year_b2, month_b2, CONFIG['REPORT']['START']).strftime("%Y/%m/%d")]
+		else:
+			if d.month == 1:
+				year_b1 = d.year - 1
+				year_b2 = d.year
+				month_b1 = 12
+				month_b2 = d.month
+			else:
+				year_b1 = d.year 
+				year_b2 = d.year
+				month_b1 = d.month - 1
+				month_b2 = d.month
+			return [datetime(year_b1, month_b1, CONFIG['REPORT']['END']).strftime("%Y/%m/%d"), datetime(year_b2, month_b2, CONFIG['REPORT']['START']).strftime("%Y/%m/%d")]
+
+	#Keep this function here
 	def on_data_change(self, i1, i2):
 		pass
 

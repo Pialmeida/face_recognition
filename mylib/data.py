@@ -25,9 +25,9 @@ class Data():
 		self._LUNCH_START = CONFIG['HOURS']['LUNCH_START']
 		self._LUNCH_END = CONFIG['HOURS']['LUNCH_END']
 
-		self._DAILY_HOURS = self.stringDelta(str(self.timeDelta(self._LUNCH_START, self._LUNCH_END)), str(self.timeDelta(self._DAY_START, self._DAY_END)))
+		self._DAILY_HOURS = self.generateTimeDeltaAsString(str(self.generateTimeDelta(self._LUNCH_START, self._LUNCH_END)), str(self.generateTimeDelta(self._DAY_START, self._DAY_END)))
 
-		self.count = self.cursor.execute(f"SELECT COUNT(*) FROM log").fetchone()[0] + 1
+		self.count = self.cursor.execute(f"SELECT MAX(CAST(IDX AS INT)) FROM log").fetchone()[0] + 1
 
 	def addEntry(self, name, now=datetime.now()):
 		today = now.strftime("%d/%m/%Y")
@@ -41,7 +41,6 @@ class Data():
 	
 		if data is None:
 			print(f'{name} NOW IN')
-			print(f"INSERT INTO log(IDX, NOME, DIA, STATUS, ENTRADA) VALUES('{str(self.count)}', '{name}', '{today}' , 'IN', '{time}')")
 			self.cursor.execute(f"INSERT INTO log(IDX, NOME, DIA, STATUS, ENTRADA) VALUES('{str(self.count)}', '{name}', '{today}' , 'IN', '{time}')")
 			self.conn.commit()
 			self.count += 1
@@ -49,7 +48,7 @@ class Data():
 
 		elif IN1 is not None and OUT1 is None and IN2 is None and OUT2 is None:
 			print(f'{name} NOW OUT')
-			self.cursor.execute(f"UPDATE log SET SAIDA = '{time}', STATUS = 'OUT', [HORAS TRABALHADAS] = '{self.stringDelta(IN1,time)}' WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = '{time}', STATUS = 'OUT', [HORAS TRABALHADAS] = '{self.generateTimeDeltaAsString(IN1,time)}' WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL")
 			self.conn.commit()
 			return 'SAIDA'
 
@@ -61,7 +60,7 @@ class Data():
 
 		elif IN1 is not None and OUT1 is None and IN2 is not None and OUT2 is not None:
 			print(f'{name} FINAL EXIT')
-			self.cursor.execute(f"UPDATE log SET SAIDA = '{time}', STATUS = 'OUT', [HORAS TRABALHADAS] = '{self.stringDelta(str(self.timeDelta(IN2,OUT2)),str(self.stringDelta(IN1,time)))}' WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND [ENTRADA ALMOCO] IS NOT NULL AND [SAIDA ALMOCO] IS NOT NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = '{time}', STATUS = 'OUT', [HORAS TRABALHADAS] = '{self.generateTimeDeltaAsString(str(self.generateTimeDelta(IN2,OUT2)),str(self.generateTimeDeltaAsString(IN1,time)))}' WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND [ENTRADA ALMOCO] IS NOT NULL AND [SAIDA ALMOCO] IS NOT NULL")
 			self.conn.commit()
 			return 'SAIDA'
 		else:
@@ -85,7 +84,7 @@ class Data():
 			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', [HORAS TRABALHADAS] = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NOT NULL AND [ENTRADA ALMOCO] IS NOT NULL AND [SAIDA ALMOCO] IS NOT NULL")
 			self.conn.commit()
 		elif IN1 is not None and OUT1 is None and IN2 is not None and OUT2 is not None: #Missing last
-			self.cursor.execute(f"UPDATE log SET SAIDA = '{IN2}', STATUS = 'OUT', [HORAS TRABALHADAS] = '{self.stringDelta(IN1,IN2)}', [ENTRADA ALMOCO] = NULL, [SAIDA ALMOCO] = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND [ENTRADA ALMOCO] IS NOT NULL AND [SAIDA ALMOCO] IS NOT NULL")
+			self.cursor.execute(f"UPDATE log SET SAIDA = '{IN2}', STATUS = 'OUT', [HORAS TRABALHADAS] = '{self.generateTimeDeltaAsString(IN1,IN2)}', [ENTRADA ALMOCO] = NULL, [SAIDA ALMOCO] = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL AND [ENTRADA ALMOCO] IS NOT NULL AND [SAIDA ALMOCO] IS NOT NULL")
 			self.conn.commit()
 		elif IN1 is not None and OUT1 is not None and IN2 is None and OUT2 is None:
 			self.cursor.execute(f"UPDATE log SET SAIDA = NULL, STATUS = 'IN', [HORAS TRABALHADAS] = NULL WHERE NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NOT NULL")
@@ -93,7 +92,6 @@ class Data():
 		elif IN1 is not None and OUT1 is None and IN2 is None and OUT2 is None:
 			self.cursor.execute(f"DELETE FROM log WHERE [IDX] = '{IDX}' AND NOME = '{name}' AND DIA = '{today}' AND ENTRADA IS NOT NULL AND SAIDA IS NULL")
 			self.conn.commit()
-			self.count -= 1
 
 		print(f'\n\n\n{name} rolled back!\n\n\n')
 
@@ -106,9 +104,9 @@ class Data():
 		''', self.conn)
 
 	def getLog(self, _filter={}, raw = False, modify = False):
-		return pd.read_sql_query(self.getQuery(_filter, raw = raw, modify = modify), self.conn)
+		return pd.read_sql_query(self.generateQuery(_filter, raw = raw, modify = modify), self.conn)
 
-	def stringDelta(self,date1,date2):
+	def generateTimeDeltaAsString(self,date1,date2):
 		date1 = datetime.strptime(date1,r'%H:%M:%S')
 		date2 = datetime.strptime(date2,r'%H:%M:%S')
 
@@ -132,15 +130,15 @@ class Data():
 
 		return f'{h}:{m}:{s}'
 
-	def timeDelta(self, date1, date2):
+	def generateTimeDelta(self, date1, date2):
 		date1 = datetime.strptime(date1,r'%H:%M:%S')
 		date2 = datetime.strptime(date2,r'%H:%M:%S')
 
 		return (date2-date1)
 
-	def getQuery(self, _filter, raw = False, modify = False):
+	def generateQuery(self, _filter, raw = False, modify = False):
 		if not modify:
-			if not raw: # Display in Main Window
+			if raw == False: # Display in Main Window
 				if _filter == {}:
 					out = ''
 				else:
@@ -194,42 +192,72 @@ class Data():
 				'''
 
 				return query
-			else: #To Excel
-
+			elif raw == 'excel': #To Excel
 				query = f'''
 						SELECT *
 						FROM log
 						{out}
 				'''
 				return query
-		
+
+			elif raw == 'month':
+				query = f'''
+						SELECT *
+						FROM log
+						WHERE (SUBSTR(DIA, 7, 4) || '/' || SUBSTR(DIA, 4, 2) || '/' || SUBSTR(DIA, 1, 2)) BETWEEN '{_filter['date'][0]}' and '{_filter['date'][1]}'
+				'''
+
+				return query
 
 		else: #Modify
 			if _filter == {}:
 				out = ''
 			else:
-				out = ''
+				conditions = []
+				if _filter['name'].upper() != '' and _filter['name'].upper() != 'ALL':
+					conditions.append(f"NOME LIKE '%{_filter['name'].upper()}%'")
+
+				conditions.append(f"(SUBSTR(DIA, 7, 4) || '/' || SUBSTR(DIA, 4, 2) || '/' || SUBSTR(DIA, 1, 2)) BETWEEN '{_filter['date'][0]}' and '{_filter['date'][1]}'")
+				
+				if _filter['status'] == 0:
+					pass
+				elif _filter['status'] == 1:
+					conditions.append(f"STATUS LIKE 'OUT'")
+				elif _filter['status'] == 2:
+					conditions.append(f"STATUS LIKE 'IN'")
+				elif _filter['status'] == 3:
+					conditions.append(f"STATUS LIKE 'INVALID'")
+
+				if _filter['hour'] == 0:
+					pass
+				elif _filter['hour'] == 1:
+					conditions.append(f"(([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] < '{self._DAILY_HOURS}') OR [HORAS TRABALHADAS] IS NULL)")
+				elif _filter['hour'] == 2:
+					conditions.append(f"(([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] > '{self._DAILY_HOURS}') OR [HORAS TRABALHADAS] IS NULL)")
+				elif _filter['hour'] == 3:
+					conditions.append(f"[HORAS TRABALHADAS] IS NULL")
+				elif _filter['hour'] == 4:
+					conditions.append(f"[HORAS TRABALHADAS] IS NOT NULL")
+				elif _filter['hour'] == 5:
+					conditions.append(f"([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] < '{self._DAILY_HOURS}')")
+				elif _filter['hour'] == 6:
+					conditions.append(f"([HORAS TRABALHADAS] IS NOT NULL AND [HORAS TRABALHADAS] > '{self._DAILY_HOURS}')")
+				elif _filter['hour'] == 7:
+					conditions.append(f"[HORAS TRABALHADAS] LIKE 'INVALID'")
+
+				out = "WHERE " + " AND ".join(conditions)
 
 			query = f'''
 						SELECT [IDX] AS IDX, [NOME], [DIA], [STATUS], [ENTRADA], [SAIDA], [ENTRADA ALMOCO] AS [ALMOCO IN], [SAIDA ALMOCO] AS [ALMOCO OUT], [HORAS TRABALHADAS] AS [HORAS]
 						FROM log
 						{out}
-						ORDER BY DIA DESC
+						ORDER BY DIA DESC, NOME DESC
 				'''
 
 			print(query)
 
 			return query
 
-
-	def getModifyQuery(self, _filter):
-		query = f'''
-					SELECT *
-					FROM log
-					{out}
-			'''
-
-		return query
 
 	def data(self, row, column):
 		return self._data.iloc[row, column]
@@ -243,17 +271,15 @@ class Data():
 		self.conn.commit()
 
 	def endDay(self):
-		return str(self.timeDelta(self._DAY_END, self._DAY_START) - self.timeDelta(self._LUNCH_START, self._LUNCH_END))
+		return str(self.generateTimeDelta(self._DAY_END, self._DAY_START) - self.generateTimeDelta(self._LUNCH_START, self._LUNCH_END))
 
-	def toExcel(self, path, _filter):
-		name = f'{datetime.now().day}_{datetime.now().month}_report.xlsx'
-		self.getLog(_filter, raw = True).to_excel(os.path.join(path,name), index=False)
+	def toExcel(self, path, _filter, raw):
+		self.getLog(_filter, raw = raw).to_excel(path, index=False)
 
 	def getReport(self,name):
 		pass
 
 	def modifyData(self, index, value, data):
-
 		if index.column() == 1:
 			out = f"SET [NOME] = '{value}'"
 		elif index.column() == 2:
@@ -312,8 +338,6 @@ class Data():
 		{out}
 		'''
 
-		self.count -= 1
-
 		print(query)
 
 		self.cursor.execute(query)
@@ -324,5 +348,5 @@ class Data():
 
 if __name__ == '__main__':
 	data = Data()
-	s = data.stringDelta('07:00:00', '08:00:00')
+	s = data.generateTimeDeltaAsString('07:00:00', '08:00:00')
 	print(s)
