@@ -27,7 +27,7 @@ with open(os.path.join(_PATH,'config.json'),'r') as f:
 
 #Enter Name for Registration
 class NameRegistration(QWidget):
-	nameEntered = pyqtSignal(str)
+	nameEntered = pyqtSignal(str, bool)
 	killWindow = pyqtSignal()
 
 	def __init__(self):
@@ -179,7 +179,7 @@ class NameRegistration(QWidget):
 
 
 	def on_click1(self):
-		if self.line.text().upper() not in set([re.search('([\w ]+)_\d+.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]) and self.line.text().upper() != "":
+		if self.line.text().upper() not in set([re.search('([A-Za-z\- ]+)\_{1,2}\d+\.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]) and self.line.text().upper() != "":
 			if Camera(_all = False).load_encodings(_all = False):
 				self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_CONFIRM)
 				self.label4.setText('SUCCESSFUL REGISTRATION')
@@ -194,7 +194,8 @@ class NameRegistration(QWidget):
 
 	def registration_success(self):
 		self.completed = True
-		self.nameEntered.emit(self.line.text())
+		print(self.check.isChecked())
+		self.nameEntered.emit(self.line.text(), self.check.isChecked())
 		self.killWindow.emit()
 
 

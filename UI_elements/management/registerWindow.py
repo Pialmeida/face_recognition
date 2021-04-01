@@ -32,7 +32,7 @@ with open(os.path.join(_PATH,'config.json'),'r') as f:
 
 class RegisterWindow(QMainWindow):
 	killWindow = pyqtSignal()
-	name_entered = pyqtSignal(str)
+	name_entered = pyqtSignal(str, bool)
 
 	def __init__(self):
 		super(RegisterWindow,self).__init__()
@@ -40,8 +40,8 @@ class RegisterWindow(QMainWindow):
 		self.completed = False
 
 		self.title = 'Biometric Detection Register'
-		self.width = CONFIG['DATA_MODIFICATION']['UI_WIDTH']
-		self.height = CONFIG['DATA_MODIFICATION']['UI_HEIGHT']
+		self.width = CONFIG['REGISTER_UI']['UI_WIDTH']
+		self.height = CONFIG['REGISTER_UI']['UI_HEIGHT']
 
 		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
 
@@ -93,10 +93,10 @@ class RegisterWindow(QMainWindow):
 		self.nameEntry.close()
 		self.killWindow.emit()
 
-	@pyqtSlot(str)
-	def _name_entered(self, name):
+	@pyqtSlot(str, bool)
+	def _name_entered(self, name, email):
 		self.completed = True
-		self.name_entered.emit(name)
+		self.name_entered.emit(name, email)
 		self.killWindow.emit()
 
 	def closeEvent(self, event):

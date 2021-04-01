@@ -2,6 +2,7 @@ import os, sqlite3, json
 import pandas as pd
 from datetime import datetime, timedelta
 import sys
+import re
 
 if __name__ == '__main__':
 	sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -14,6 +15,7 @@ with open(os.path.join(_PATH,'config.json'),'r') as f:
 class Data():
 	def __init__(self):
 		self._PATH_TO_DB = CONFIG['PATH']['DATA']
+		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
 
 		self._PATH_TO_CONFIG = os.path.join(os.path.dirname(os.path.dirname(__file__)),'config.json')
 
@@ -263,8 +265,14 @@ class Data():
 		return self._data.iloc[row, column]
 
 	def getMissing(self,date):
-		for index, row in pd.read_sql_query(f"SELECT * FROM log WHERE STATUS = 'IN' AND DIA = '{date}'", self.conn).iterrows():
-			print(row['NOME'])
+		missing_entry_names = set([x[0] for x in self.cursor.execute(f"SELECT [NOME] FROM log WHERE STATUS = 'IN' AND DIA = '{date}'").fetchall()])
+		
+		want_email = set([re.search(r'([A-Za-z\- ]+)\_{1,2}\d+\.jpg',x).group(1) for x in os.listdir(self._PATH_TO_PICS) if '__' in x])
+		
+		email_list = missing_entry_names.intersection(want_email)
+
+		print(email_list)
+
 
 	def addLunchTime(self,date):
 		self.cursor.execute(f"UPDATE log SET [ENTRADA ALMOCO] = '{self._LUNCH_START}', [SAIDA ALMOCO] = '{self._LUNCH_END}', [HORAS TRABALHADAS] = TIME((strftime('%s', [SAIDA]) - strftime('%s', [ENTRADA]))-(strftime('%s', '{self._LUNCH_END}') - strftime('%s', '{self._LUNCH_START}')),'unixepoch') WHERE DIA = '{date}' AND [ENTRADA ALMOCO] IS NULL AND [SAIDA ALMOCO] IS NULL")
@@ -348,5 +356,4 @@ class Data():
 
 if __name__ == '__main__':
 	data = Data()
-	s = data.generateTimeDeltaAsString('07:00:00', '08:00:00')
-	print(s)
+	data.getMissing(r'15/03/2021')

@@ -144,7 +144,7 @@ class NameDeregistration(QWidget):
 		self.hlayout.addWidget(self.combobox)
 
 		#Add Names to Combo Box
-		[self.combobox.addItem(name) for name in sorted(set([re.search('([\w ]+)_\d+.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]))]
+		[self.combobox.addItem(name) for name in sorted(set([re.search(r'([A-Za-z\- ]+)\_{1,2}\d+\.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]))]
 
 
 		self.label3 = QLabel(self)

@@ -187,7 +187,7 @@ class MainWindow(QWidget):
 		self.button_layout.setContentsMargins(0, 0, 0, 0)
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-		self.button.setToolTip('Press to register new individual')
+		self.button.setToolTip('Press to see registered names')
 		self.button.clicked.connect(self.on_click)
 
 
@@ -268,7 +268,7 @@ class MainWindow(QWidget):
 		self.combobox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 		self.combobox.addItem('')
 		self.combobox.addItem('ALL')
-		[self.combobox.addItem(x) for x in self.data.getNames()['NOME'].tolist()]
+		[self.combobox.addItem(x) for x in sorted(self.data.getNames()['NOME'].tolist())]
 
 
 		#Date
@@ -485,13 +485,17 @@ class MainWindow(QWidget):
 		self.registerWindow.monitor.cap.close()
 		self.registerWindow.close()
 
-	@pyqtSlot(str)
-	def renameTempFiles(self, name):
+	@pyqtSlot(str, bool)
+	def renameTempFiles(self, name, email):
 		name = name.upper()
+	
 		for file in os.listdir(self._PATH_TO_PICS):
 			if file.startswith('temp'):
 				path = os.path.join(self._PATH_TO_PICS, file)
-				path2 = path.replace('temp', name)
+				if not email:
+					path2 = path.replace('temp', name)
+				else:
+					path2 = path.replace('temp', f'{name}_')
 				os.rename(path, path2)
 
 	#Remove Button
@@ -511,7 +515,7 @@ class MainWindow(QWidget):
 				path = os.path.join(self._PATH_TO_PICS, file)
 				os.remove(path)
 
-	#Filter Search
+	#Filter Config for Search
 	def on_click3(self):
 		if self.dateto.date() > QDate(self.now):
 			self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
@@ -555,6 +559,10 @@ class MainWindow(QWidget):
 		self.updateLog()
 
 	def updateLog(self):
+		self.combobox.clear()
+		self.combobox.addItem('')
+		self.combobox.addItem('ALL')
+		[self.combobox.addItem(x) for x in sorted(self.data.getNames()['NOME'].tolist())]
 		data = self.data.getLog(self.filter)
 		self.table_model = Table(data)
 		self.log.setModel(self.table_model)
