@@ -123,8 +123,9 @@ class MainWindow(QWidget):
 		#Camera Object for Live Feed
 		self.label = QLabel(self)
 		self.label.setAlignment(Qt.AlignTop)
-		self.left_layout.addWidget(self.label, int(self.height*0.67))
-		self.label.resize(int(self.width*0.5), int(self.height*0.5))
+		self.left_layout.addWidget(self.label)
+		self.label.setMinimumHeight(int(self.height*0.8))
+		self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
 
 		self.monitor = Thread(self)
 		self.monitor.setTerminationEnabled(True)
@@ -154,8 +155,8 @@ class MainWindow(QWidget):
 		#Problem with logging in
 		self.label1 = QLabel()
 		self.left_layout.addWidget(self.label1, self.height*0.35)
-		self.label1.resize(int(self.width*0.5),int(self.height*0.2))
-		self.label1.move(int(self.width*0.05),int(self.height*0.8))
+		self.label1.setMinimumHeight(int(self.height*0.15))
+		self.label1.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
 
 
 		#Layout for Button
@@ -308,7 +309,10 @@ class MainWindow(QWidget):
 				
 				#Add image for confirmation
 				path = os.path.join(self._PATH_TO_PICS,f'{names[0]}_1.jpg')
-				print(path)
+
+				if not os.path.exists(path):
+					path = os.path.join(self._PATH_TO_PICS,f'{names[0]}__1.jpg')
+
 				image = QPixmap(path).scaled(int(self.width*0.35), int(self.height*0.5), Qt.KeepAspectRatio)
 				self.label2.setPixmap(image)
 
