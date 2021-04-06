@@ -25,7 +25,7 @@ with open('config.json','r') as f:
 class MainWindow(QWidget):
 	def __init__(self):
 		super(MainWindow,self).__init__()
-		self.title = 'Biometric Detection'
+		self.title = 'Identificação Biométrica'
 		self.width = CONFIG['UI']['UI_WIDTH']
 		self.height = CONFIG['UI']['UI_HEIGHT']
 
@@ -78,16 +78,13 @@ class MainWindow(QWidget):
 				border-color: black;
 			}
 			QDateEdit::drop-down {
-				image: url(:/new/myapp/cbarrowdn.png);
-				width:50px;
-				height:15px;
+				width:15px;
 				subcontrol-position: right top;
 				subcontrol-origin:margin;
 				background-color: white;
 				border-style: solid;
-				border-width: 4px;
-				border-color: rgb(100,100,100);
-			   spacing: 5px; 
+				border-width: 2px;
+				border-color: black;
 			}
 		'''
 
@@ -126,6 +123,8 @@ class MainWindow(QWidget):
 		self.prev_name = None
 
 		self.data = Data()
+
+		self.removeTempPics()
 
 		self.setupUI()
 
@@ -182,12 +181,12 @@ class MainWindow(QWidget):
 		self.label1.setLayout(self.button_layout)
 
 		#Button
-		self.button = QPushButton('VIEW REGISTERED NAMES', self)
+		self.button = QPushButton('NOMES REGISTRADOS', self)
 		self.button_layout.addWidget(self.button)
 		self.button_layout.setContentsMargins(0, 0, 0, 0)
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-		self.button.setToolTip('Press to see registered names')
+		self.button.setToolTip('Aperte para ver nomes registrados')
 		self.button.clicked.connect(self.on_click)
 
 
@@ -199,12 +198,12 @@ class MainWindow(QWidget):
 		self.label2.setLayout(self.button1_layout)
 
 		#Button
-		self.button1 = QPushButton('REGISTER', self)
+		self.button1 = QPushButton('REGISTRAR', self)
 		self.button1_layout.addWidget(self.button1)
 		self.button1_layout.setContentsMargins(0, 0, 0, 0)
 		self.button1.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button1.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-		self.button1.setToolTip('Press to register new individual')
+		self.button1.setToolTip('Aperte para inicializar novo cadastro')
 		self.button1.clicked.connect(self.on_click1)
 
 
@@ -216,12 +215,12 @@ class MainWindow(QWidget):
 		self.label3.setLayout(self.button2_layout)
 
 		#Button
-		self.button2 = QPushButton('DEREGISTER', self)
+		self.button2 = QPushButton('DEREGISTRAR', self)
 		self.button2_layout.addWidget(self.button2)
 		self.button2_layout.setContentsMargins(0, 0, 0, 0)
 		self.button2.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button2.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-		self.button2.setToolTip('Press to de-register new individual')
+		self.button2.setToolTip('Aperte para remover cadastro existente')
 		self.button2.clicked.connect(self.on_click2)
 
 
@@ -239,7 +238,7 @@ class MainWindow(QWidget):
 		self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT)
 		self.label4.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 		self.label4.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
-		self.label4.setText('FILTER')
+		self.label4.setText('FILTRO')
 
 		#ComboBox for Search
 		self.label5 = QLabel(self)
@@ -256,7 +255,7 @@ class MainWindow(QWidget):
 		self.label6 = QLabel(self)
 		self.combox_layout.addWidget(self.label6)
 		self.label6.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label6.setText('Name: ')
+		self.label6.setText('Nome: ')
 		self.label6.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
 
 		#Combo Box to Put Names
@@ -267,7 +266,7 @@ class MainWindow(QWidget):
 		self.combobox.setMinimumHeight(int(self.height*0.05))
 		self.combobox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 		self.combobox.addItem('')
-		self.combobox.addItem('ALL')
+		self.combobox.addItem('TODOS')
 		[self.combobox.addItem(x) for x in sorted(self.data.getNames()['NOME'].tolist())]
 
 
@@ -291,6 +290,7 @@ class MainWindow(QWidget):
 
 		#From Data Select
 		self.datefrom = QDateEdit(self)
+		self.datefrom.setCalendarPopup(True)
 		self.datefrom.setDate(QDate((self.now - timedelta(30)).year, (self.now - timedelta(30)).month, (self.now - timedelta(30)).day))
 		self.date_layout.addWidget(self.datefrom)
 		self.datefrom.setStyleSheet(self._DATEEDIT_LAYOUT)
@@ -305,6 +305,7 @@ class MainWindow(QWidget):
 
 		#Date to Select
 		self.dateto = QDateEdit(self)
+		self.dateto.setCalendarPopup(True)
 		self.dateto.setDate(QDate(self.now.year, self.now.month, self.now.day))
 		self.date_layout.addWidget(self.dateto)
 		self.dateto.setStyleSheet(self._DATEEDIT_LAYOUT)
@@ -352,7 +353,7 @@ class MainWindow(QWidget):
 
 		#Hour Title
 		self.label13 = QLabel(self)
-		self.label13.setText('Hour: ')
+		self.label13.setText('Hora: ')
 		self.label13.setStyleSheet(self._TEXT_LABEL_LAYOUT)
 		self.hour_layout.addWidget(self.label13)
 
@@ -393,18 +394,18 @@ class MainWindow(QWidget):
 
 
 		#Search Button
-		self.button3 = QPushButton('SEARCH', self)
+		self.button3 = QPushButton('BUSCAR', self)
 		self.filter_control_layout.addWidget(self.button3)
-		self.button3.setToolTip('Press to apply current filter')
+		self.button3.setToolTip('Aperte para aplicar filtro')
 		self.button3.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 		self.button3.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button3.clicked.connect(self.on_click3)
 
 		#Clear
-		self.button4 = QPushButton('CLEAR', self)
+		self.button4 = QPushButton('LIMPAR', self)
 		self.filter_control_layout.addWidget(self.button4)
 		self.button4.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-		self.button4.setToolTip('Press to clear filters')
+		self.button4.setToolTip('Aperte para limpar filtro')
 		self.button4.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button4.clicked.connect(self.on_click4)
 
@@ -421,10 +422,10 @@ class MainWindow(QWidget):
 		self.edit_layout.setContentsMargins(0, 0, 0, 0)
 
 		#Button for Editing
-		self.button5 = QPushButton('EDIT ENTRIES',self)
+		self.button5 = QPushButton('EDITAR LOG',self)
 		self.edit_layout.addWidget(self.button5)
 		self.button5.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-		self.button5.setToolTip('Press to edit database entries')
+		self.button5.setToolTip('Aperte para editar dados')
 		self.button5.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button5.clicked.connect(self.on_click5)
 
@@ -446,16 +447,16 @@ class MainWindow(QWidget):
 		self.logman_layout.setContentsMargins(0, 0, 0, 0)
 
 		#To excel
-		self.button6 = QPushButton('TO EXCEL', self)
-		self.button6.setToolTip('Press to generate excel file with current filter')
+		self.button6 = QPushButton('EXCEL', self)
+		self.button6.setToolTip('Aperte para gerar arquivo excel com filtro atual')
 		self.logman_layout.addWidget(self.button6)
 		self.button6.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button6.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 		self.button6.clicked.connect(self.on_click6)
 
 		#Generate monthly report
-		self.button7 = QPushButton('MONTHLY REPORT', self)
-		self.button7.setToolTip('Press to monthly report excel file')
+		self.button7 = QPushButton('RELATORIO MENSAL', self)
+		self.button7.setToolTip('Aperte para gerar arquivo excel do mês passado')
 		self.logman_layout.addWidget(self.button7)
 		self.button7.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button7.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
@@ -467,11 +468,11 @@ class MainWindow(QWidget):
 	#View Registered Names
 	def on_click(self):
 		self.nameList = QMainWindow()
-		self.nameList.setWindowTitle('Name List')
+		self.nameList.setWindowTitle('Lista de Nomes')
 		self.listwidget = QListWidget()
 		self.nameList.setCentralWidget(self.listwidget)
 		self.nameList.show()
-		[self.listwidget.addItem(x) for x in sorted(set([re.search('([\w ]+)_\d+.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]))]
+		[self.listwidget.addItem(x) for x in sorted(set([re.search('([A-Za-z\- ]+)\_{1,2}\d+\.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]))]
 
 
 	#Register Button
@@ -519,11 +520,11 @@ class MainWindow(QWidget):
 	def on_click3(self):
 		if self.dateto.date() > QDate(self.now):
 			self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
-			self.label14.setText('DATE TO CANNOT BE AFTER TODAY')
+			self.label14.setText('DATA FINAL NÃO PODE SER DEPOIS DE HOJE')
 			return
 		if self.datefrom.date() > self.dateto.date():
 			self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
-			self.label14.setText('DATE BEFORE CANNOT BE AFTER DATE TO')
+			self.label14.setText('DATA INICIAL NÃO PODE SER DEPOIS DE DATA FINAL')
 			return
 
 
@@ -561,7 +562,7 @@ class MainWindow(QWidget):
 	def updateLog(self):
 		self.combobox.clear()
 		self.combobox.addItem('')
-		self.combobox.addItem('ALL')
+		self.combobox.addItem('TODOS')
 		[self.combobox.addItem(x) for x in sorted(self.data.getNames()['NOME'].tolist())]
 		data = self.data.getLog(self.filter)
 		self.table_model = Table(data)
@@ -651,7 +652,14 @@ class MainWindow(QWidget):
 	def validChange(self, index, value):
 		self.label14.setText('')
 
+	def removeTempPics(self):
+		for file in os.listdir(self._PATH_TO_PICS):
+			if file.startswith('temp'):
+				path = os.path.join(self._PATH_TO_PICS, file)
+				os.remove(path)
+
 	def closeEvent(self, event):
+		self.removeTempPics()
 		self.data.close()
 
 

@@ -36,13 +36,13 @@ class Thread(QThread):
 		self.recognize = True
 		self.cap = VideoGet().start()
 		self._FONT = cv2.FONT_HERSHEY_SIMPLEX
-		self._TEXT = r"PRESS SPACE TO SAVE"
+		self._TEXT = r"APERTE ESPACO PARA SALVAR"
 		self.count = CONFIG['DETECTION']['PICS_REQ']
-		self._TEXT2 = f"{self.count} LEFT"
+		self._TEXT2 = f"{self.count} RESTANTE"
 		self._TEXT_SIZE = cv2.getTextSize(self._TEXT, self._FONT, 0.6, 2)[0]
 		self._TEXT_SIZE2 = cv2.getTextSize(self._TEXT2, self._FONT, 0.6, 2)[0]
 		while True:
-			self._TEXT2 = f"{self.count} LEFT"
+			self._TEXT2 = f"{self.count} RESTANTE"
 			self._TEXT_SIZE2 = cv2.getTextSize(self._TEXT2, self._FONT, 0.6, 2)[0]
 			_, frame = self.cap.read()
 			names = []

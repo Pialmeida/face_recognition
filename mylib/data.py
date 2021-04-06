@@ -145,7 +145,7 @@ class Data():
 					out = ''
 				else:
 					conditions = []
-					if _filter['name'].upper() != '' and _filter['name'].upper() != 'ALL':
+					if _filter['name'].upper() != '' and _filter['name'].upper() != 'TODOS':
 						conditions.append(f"NOME LIKE '%{_filter['name'].upper()}%'")
 
 					conditions.append(f"(SUBSTR(DIA, 7, 4) || '/' || SUBSTR(DIA, 4, 2) || '/' || SUBSTR(DIA, 1, 2)) BETWEEN '{_filter['date'][0]}' and '{_filter['date'][1]}'")
@@ -275,7 +275,7 @@ class Data():
 
 
 	def addLunchTime(self,date):
-		self.cursor.execute(f"UPDATE log SET [ENTRADA ALMOCO] = '{self._LUNCH_START}', [SAIDA ALMOCO] = '{self._LUNCH_END}', [HORAS TRABALHADAS] = TIME((strftime('%s', [SAIDA]) - strftime('%s', [ENTRADA]))-(strftime('%s', '{self._LUNCH_END}') - strftime('%s', '{self._LUNCH_START}')),'unixepoch') WHERE DIA = '{date}' AND [ENTRADA ALMOCO] IS NULL AND [SAIDA ALMOCO] IS NULL")
+		self.cursor.execute(f"UPDATE log SET [ENTRADA ALMOCO] = '{self._LUNCH_START}', [SAIDA ALMOCO] = '{self._LUNCH_END}', [HORAS TRABALHADAS] = TIME((strftime('%s', [SAIDA]) - strftime('%s', [ENTRADA]))-(strftime('%s', '{self._LUNCH_END}') - strftime('%s', '{self._LUNCH_START}')),'unixepoch') WHERE DIA = '{date}' AND [ENTRADA ALMOCO] IS NULL AND [SAIDA ALMOCO] IS NULL AND [ENTRADA] IS NOT NULL AND [SAIDA] IS NOT NULL")
 		self.conn.commit()
 
 	def endDay(self):

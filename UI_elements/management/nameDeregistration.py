@@ -131,7 +131,7 @@ class NameDeregistration(QWidget):
 		#Name Title
 		self.label2 = QLabel(self)
 		self.hlayout.addWidget(self.label2)
-		self.label2.setText('Name:')
+		self.label2.setText('Nome:')
 		self.label2.setStyleSheet(self._TEXT_LABEL_LAYOUT)
 
 		#Combo Box with Names to Deregister
@@ -152,7 +152,7 @@ class NameDeregistration(QWidget):
 		self.label3.setLayout(self.button_layout)
 
 		#Button to submit name
-		self.button = QPushButton('SUBMIT', self)
+		self.button = QPushButton('ENVIAR', self)
 		self.button_layout.addWidget(self.button)
 		self.button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 		self.layout.addWidget(self.label3)
@@ -175,25 +175,30 @@ class NameDeregistration(QWidget):
 		if self.combobox.currentText() in [self.combobox.itemText(i) for i in range(self.combobox.count())] and self.combobox.currentText() != '':
 			if self._unconfirmed:
 				self._unconfirmed = False
-				self.button.setText('PRESS AGAIN TO DEREGISTER')
+				self.button.setText('APERTE NOVAMENTE PARA DEREGISTRAR')
 			else:
 				self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_CONFIRM)
-				self.label4.setText('SUCCESSFUL DEREGISTRATION')
+				self.label4.setText('DEREGISTRADO COM SUCESSO')
 				self.timer.start(1000)
 		else:
 			self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
-			self.label4.setText('NAME NOT RECOGNIZED\nSELECT FROM LIST')
+			self.label4.setText('NOME NAO RECONHECIDO\nSELECIONE DA LISTA')
 
 	def updatePic(self, name):
 		if self._unconfirmed == False:
 			self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
-			self.label4.setText('CANCELLED DEREGISTRATION')
+			self.label4.setText('DEREGISTRAÇÃO CANCELADA')
 
-		self.button.setText('SUBMIT')
+		self.button.setText('ENVIAR')
 		self._unconfirmed = True
-		path = os.path.join(self._PATH_TO_PICS,f'{name}_1.jpg')
-		image = QPixmap(path).scaled(int(self.width*0.9), int(self.height*0.6), Qt.KeepAspectRatio)
-		self.label.setPixmap(image)
+		
+		if name != '':
+			if os.path.exists(os.path.join(self._PATH_TO_PICS,f'{name}_1.jpg')):
+				path = os.path.join(self._PATH_TO_PICS,f'{name}_1.jpg')
+			else:
+				path = os.path.join(self._PATH_TO_PICS,f'{name}__1.jpg')
+			image = QPixmap(path).scaled(int(self.width*0.9), int(self.height*0.6), Qt.KeepAspectRatio)
+			self.label.setPixmap(image)
 
 	def deregistration_success(self):
 		self.completed = True

@@ -126,7 +126,7 @@ class NameRegistration(QWidget):
 		#Name Title
 		self.label2 = QLabel(self)
 		self.hlayout.addWidget(self.label2)
-		self.label2.setText('Name:')
+		self.label2.setText('Nome:')
 		self.label2.setStyleSheet(self._TEXT_LABEL_LAYOUT)
 
 		#Line Edit
@@ -143,7 +143,7 @@ class NameRegistration(QWidget):
 		self.email_layout.setContentsMargins(0, 0, 0, 0)
 		self.label3.setLayout(self.email_layout)
 
-		self.check = QCheckBox('EMAIL ALERT', self)
+		self.check = QCheckBox('ALERTA EMAIL', self)
 		self.email_layout.addWidget(self.check)
 		self.check.setStyleSheet(self._CHECK_BOX_LAYOUT)
 
@@ -154,7 +154,7 @@ class NameRegistration(QWidget):
 		self.label4.setLayout(self.button_layout)
 
 		#Button to submit name
-		self.button = QPushButton('SUBMIT', self)
+		self.button = QPushButton('ENVIAR', self)
 		self.button_layout.addWidget(self.button)
 		self.button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 		self.layout.addWidget(self.label4)
@@ -182,15 +182,15 @@ class NameRegistration(QWidget):
 		if self.line.text().upper() not in set([re.search('([A-Za-z\- ]+)\_{1,2}\d+\.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]) and self.line.text().upper() != "":
 			if Camera(_all = False).load_encodings(_all = False):
 				self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_CONFIRM)
-				self.label4.setText('SUCCESSFUL REGISTRATION')
+				self.label4.setText('REGISTRADO COM SUCESSO')
 				self.timer.start(1000)
 			else:
 				self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
-				self.label4.setText('INVALID PICTURES')
+				self.label4.setText('FOTOS INVALIDAS')
 				self.timer2.start(1000)
 		else:
 			self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
-			self.label4.setText('NAME ALREADY REGISTERED')
+			self.label4.setText('NOME JÁ REGISTRADO')
 
 	def registration_success(self):
 		self.completed = True

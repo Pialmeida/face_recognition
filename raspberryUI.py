@@ -165,11 +165,11 @@ class MainWindow(QWidget):
 
 
 		#Reclamar de Problema
-		self.button = QPushButton('NOT YOU?', self)
+		self.button = QPushButton('NÃO É VOCÊ?', self)
 		self.button_layout.addWidget(self.button)
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-		self.button.setToolTip('Press to retry scan')
+		self.button.setToolTip('Aperte para tentar reconhecimento novamente')
 		self.button.move(int(self.width*0.50), int(self.height*0.667))
 		self.button.setGeometry(10,10, 1000, int(self.height*0.30))
 		self.button.clicked.connect(self.on_click1)
@@ -200,7 +200,7 @@ class MainWindow(QWidget):
 		self.label3.resize(int(self.width*0.35), int(self.height*0.06))
 		self.label3.move(int(self.width*0.6),int(self.height*0.46))
 		self.label3.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label3.setText('NAME')
+		self.label3.setText('NOME')
 
 		#Spacing
 		self.right_layout.addSpacing(2)
@@ -211,7 +211,7 @@ class MainWindow(QWidget):
 		self.label4.resize(int(self.width*0.35), int(self.height*0.06))
 		self.label4.move(int(self.width*0.6),int(self.height*0.54))
 		self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label4.setText('TIME')
+		self.label4.setText('HORA')
 
 		#Spacing
 		self.right_layout.addSpacing(2)
@@ -270,7 +270,7 @@ class MainWindow(QWidget):
 	def on_click1(self):
 		self.data.removeLast(self._prev_name)
 		self._prev_name = None
-		self.button.setText('NOT YOU?')
+		self.button.setText('NÃO É VOCÊ?')
 
 	def alertUser(self):
 		if datetime.now().day != self.now.day:
@@ -320,7 +320,7 @@ class MainWindow(QWidget):
 				self.label4.setText(time.strftime("%m/%d/%Y, %H:%M:%S"))
 				self.label5.setText(self.data.addEntry(names[0].upper(), time))
 
-				self.button.setText(f'NOT {names[0].upper()}?')
+				self.button.setText(f'NÃO É {names[0].upper()}?')
 			else:
 				print('Name already recorded')
 
@@ -330,7 +330,7 @@ class MainWindow(QWidget):
 
 	def resetPrevName(self):
 		print('PREV NAME RESET')
-		self.button.setText('NOT YOU?')
+		self.button.setText('NÃO É VOCÊ?')
 		self.prev_name = None
 
 	def closeEvent(self, closeEvent):
