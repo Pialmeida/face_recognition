@@ -36,7 +36,7 @@ class Thread(QThread):
 		self.cap = VideoGet().start()
 		self.cam = Camera()
 		while True:
-			_, frame = self.cap.read()
+			frame = self.cap.read()
 			names = []
 			rgbImage = cv2.flip(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), 1)
 			h, w, ch = rgbImage.shape
@@ -52,7 +52,7 @@ class Thread(QThread):
 class MainWindow(QWidget):
 	def __init__(self):
 		super(MainWindow,self).__init__()
-		self.title = 'Iris Biometric Detection'
+		self.title = 'Face Detection Detection'
 		self.width = CONFIG['UI']['UI_WIDTH']
 		self.height = CONFIG['UI']['UI_HEIGHT']
 

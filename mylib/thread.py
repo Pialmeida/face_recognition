@@ -10,10 +10,10 @@ class VideoGet():
 
 		#Initialize counter and queue
 		self.counter = 1
-		self.queue = queue.Queue(maxsize=5)
+		self.queue = queue.Queue(maxsize=3)
 
 		#Initialize capture object to get frame ad read initial frame
-		self.stream = cv2.VideoCapture(src, cv2.CAP_DSHOW)
+		self.stream = cv2.VideoCapture(src)
 		(self.grabbed, self.frame) = self.stream.read()
 		self.stopped = False
 
@@ -25,7 +25,7 @@ class VideoGet():
 
 	def read(self):
 		#Return object from queue
-		return (True, self.queue.get())
+		return self.queue.get()
 
 	def _get(self):
 		#Object function for thread

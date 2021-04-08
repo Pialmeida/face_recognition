@@ -189,7 +189,7 @@ class Data():
 						FROM log
 						{out}
 						GROUP BY NOME, DIA
-						ORDER BY DIA DESC,HORA DESC
+						ORDER BY (SUBSTR(DIA, 7, 4) || '/' || SUBSTR(DIA, 4, 2) || '/' || SUBSTR(DIA, 1, 2)) DESC,HORA DESC
 						LIMIT {CONFIG['UI']['LOG_LENGTH']}
 				'''
 
@@ -198,7 +198,6 @@ class Data():
 				query = f'''
 						SELECT *
 						FROM log
-						{out}
 				'''
 				return query
 
@@ -253,7 +252,7 @@ class Data():
 						SELECT [IDX] AS IDX, [NOME], [DIA], [STATUS], [ENTRADA], [SAIDA], [ENTRADA ALMOCO] AS [ALMOCO IN], [SAIDA ALMOCO] AS [ALMOCO OUT], [HORAS TRABALHADAS] AS [HORAS]
 						FROM log
 						{out}
-						ORDER BY DIA DESC, NOME DESC
+						ORDER BY (SUBSTR(DIA, 7, 4) || '/' || SUBSTR(DIA, 4, 2) || '/' || SUBSTR(DIA, 1, 2)) DESC,HORA DESC
 				'''
 
 			print(query)
