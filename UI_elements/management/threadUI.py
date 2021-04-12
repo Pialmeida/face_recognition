@@ -44,15 +44,16 @@ class Thread(QThread):
 		while True:
 			self._TEXT2 = f"{self.count} RESTANTE"
 			self._TEXT_SIZE2 = cv2.getTextSize(self._TEXT2, self._FONT, 0.6, 2)[0]
-			_, frame = self.cap.read()
-			names = []
-			frame2 = frame
-			rgbImage = cv2.flip(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), 1)
-			rgbImage2 = cv2.flip(cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB), 1)
-			h, w, ch = rgbImage.shape
-			bytesPerLine = ch * w
-			p2 = QImage(rgbImage2.data, w, h, bytesPerLine, QImage.Format_RGB888)
-			self.saveImage.emit(p2)
+			frame = self.cap.read()
+			if frame is not None:
+				names = []
+				frame2 = frame
+				rgbImage = cv2.flip(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), 1)
+				rgbImage2 = cv2.flip(cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB), 1)
+				h, w, ch = rgbImage.shape
+				bytesPerLine = ch * w
+				p2 = QImage(rgbImage2.data, w, h, bytesPerLine, QImage.Format_RGB888)
+				self.saveImage.emit(p2)
 
 			#Instructions
 			cv2.putText(rgbImage, self._TEXT, (int((w-self._TEXT_SIZE[0])/2), int(0.9*h)), self._FONT, 0.6, (0, 0, 0), 5)

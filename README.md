@@ -16,6 +16,7 @@
 	- Add auto-sender for individuals missing entries
 		- ~~Add recognition for users missing entries~~
 		- Add auto-sender for recognized users
+	- Add ability to register night-time shifts
 
 - Create front-end UI for Computer Access
 	- Add registering functionality
@@ -30,6 +31,10 @@
 		- ~~Add data update~~
 		- ~~Add to excel button~~
 		- ~~Add generate report button~~
+			- Add overtime feature (Horas Extras)
+			- Add overtime on holidays (Horas Extras Diferenciado 100%)
+			- Add column with late days
+			- Add classification of night-time shift
 	- ~~Add filter mechanism for data lookup~~
 		- ~~Add name filter~~
 		- ~~Add date filter~~
@@ -40,3 +45,8 @@
 		- ~~Add entry modification~~
 		- ~~Add deletion of rows~~
 
+
+Horas Extras
+Horas Extras Diferenciado 100%
+Atrasos
+Adicional Noturno
