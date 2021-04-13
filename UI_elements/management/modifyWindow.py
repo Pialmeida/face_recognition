@@ -216,39 +216,68 @@ class ModifyWindow(QWidget):
 		self.button.setStyleSheet(self._BUTTON_LAYOUT)
 		self.button.clicked.connect(self.on_click1)
 
-		#Add Filter Section Layout
+
+		#Overtime Control
+		#1
 		self.label3 = QLabel(self)
-		self.right_layout.addWidget(self.label3, int(self.height*0.3))
+		self.right_layout.addWidget(self.label3)
+		self.label3.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+		self.label3.setMinimumHeight(int(self.height * 0.12))
+
+		self.overtime_layout = QVBoxLayout()
+		self.label3.setLayout(self.overtime_layout)
+		self.overtime_layout.setContentsMargins(0, 0, 0, 0)
+
+		self.button2 = QPushButton('HORA EXTRA', self)
+		self.overtime_layout.addWidget(self.button2)
+		self.button2.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+		self.button2.setMinimumHeight(int(self.height * 0.05))
+		self.button2.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button2.clicked.connect(self.on_click2)
+
+		
+		self.button3 = QPushButton('HORA EXTRA 100%', self)
+		self.overtime_layout.addWidget(self.button3)
+		self.button3.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+		self.button3.setMinimumHeight(int(self.height * 0.05))
+		self.button3.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button3.clicked.connect(self.on_click3)
+
+
+
+		#Add Filter Section Layout
+		self.label6 = QLabel(self)
+		self.right_layout.addWidget(self.label6, int(self.height*0.3))
 		self.search_layout = QVBoxLayout()
-		self.label3.setLayout(self.search_layout)
+		self.label6.setLayout(self.search_layout)
 		self.search_layout.setContentsMargins(0, 0, 0, 0)
 
 
 		#Filter Section
-		self.label4 = QLabel(self)
-		self.search_layout.addWidget(self.label4, alignment = Qt.AlignTop)
-		self.label4.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label4.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-		self.label4.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
-		self.label4.setText('FILTER')
+		self.label7 = QLabel(self)
+		self.search_layout.addWidget(self.label7, alignment = Qt.AlignTop)
+		self.label7.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label7.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label7.setAlignment(Qt.AlignHCenter  | Qt.AlignVCenter)
+		self.label7.setText('FILTER')
 
 		#ComboBox for Search
-		self.label5 = QLabel(self)
-		self.label5.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-		self.label5.setMinimumHeight(int(self.height*0.05))
-		self.search_layout.addWidget(self.label5)
+		self.label8 = QLabel(self)
+		self.label8.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label8.setMinimumHeight(int(self.height*0.05))
+		self.search_layout.addWidget(self.label8)
 
 		#Layout for Control Buttons
 		self.combox_layout = QHBoxLayout()
-		self.label5.setLayout(self.combox_layout)
+		self.label8.setLayout(self.combox_layout)
 		self.combox_layout.setContentsMargins(3, 0, 3, 0)
 
 		#Label for Name
-		self.label6 = QLabel(self)
-		self.combox_layout.addWidget(self.label6)
-		self.label6.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label6.setText('Name: ')
-		self.label6.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+		self.label9 = QLabel(self)
+		self.combox_layout.addWidget(self.label9)
+		self.label9.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label9.setText('Name: ')
+		self.label9.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
 
 		#Combo Box to Put Names
 		self.combobox = ExtendedComboBox(self)
@@ -263,22 +292,22 @@ class ModifyWindow(QWidget):
 
 
 		#Date
-		self.label7 = QLabel(self)
-		self.label7.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-		self.label7.setMinimumHeight(int(self.height*0.05))
-		self.search_layout.addWidget(self.label7)
+		self.label10 = QLabel(self)
+		self.label10.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label10.setMinimumHeight(int(self.height*0.05))
+		self.search_layout.addWidget(self.label10)
 
 		#Date Layout
 		self.date_layout = QHBoxLayout()
-		self.label7.setLayout(self.date_layout)
+		self.label10.setLayout(self.date_layout)
 		self.date_layout.setContentsMargins(3, 0, 3, 0)
 
 		#Date From Label
-		self.label8 = QLabel(self)
-		self.date_layout.addWidget(self.label8)
-		self.label8.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label8.setText('From: ')
-		self.label8.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+		self.label11 = QLabel(self)
+		self.date_layout.addWidget(self.label11)
+		self.label11.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label11.setText('From: ')
+		self.label11.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
 
 		#From Data Select
 		self.datefrom = QDateEdit(self)
@@ -288,11 +317,11 @@ class ModifyWindow(QWidget):
 		self.datefrom.setDisplayFormat('dd/MM/yyyy')
 
 		#Date To Label
-		self.label9 = QLabel(self)
-		self.date_layout.addWidget(self.label9)
-		self.label9.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label9.setText('To: ')
-		self.label9.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+		self.label12 = QLabel(self)
+		self.date_layout.addWidget(self.label12)
+		self.label12.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label12.setText('To: ')
+		self.label12.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
 
 		#Date to Select
 		self.dateto = QDateEdit(self)
@@ -303,21 +332,21 @@ class ModifyWindow(QWidget):
 
 
 		#Status Label
-		self.label10 = QLabel(self)
-		self.search_layout.addWidget(self.label10)
-		self.label10.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-		self.label10.setMinimumHeight(int(self.height*0.05))
+		self.label13 = QLabel(self)
+		self.search_layout.addWidget(self.label13)
+		self.label13.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label13.setMinimumHeight(int(self.height*0.05))
 
 		#Status Layout
 		self.status_layout = QHBoxLayout()
-		self.label10.setLayout(self.status_layout)
+		self.label13.setLayout(self.status_layout)
 		self.status_layout.setContentsMargins(3, 0, 3, 0)
 
 		#Status Title
-		self.label11 = QLabel(self)
-		self.label11.setText('Status: ')
-		self.label11.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.status_layout.addWidget(self.label11)
+		self.label14 = QLabel(self)
+		self.label14.setText('Status: ')
+		self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.status_layout.addWidget(self.label14)
 
 		#Checkboxes
 		self.check = QCheckBox('IN')
@@ -331,21 +360,21 @@ class ModifyWindow(QWidget):
 
 
 		#Hour Label
-		self.label12 = QLabel(self)
-		self.search_layout.addWidget(self.label12)
-		self.label12.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-		self.label12.setMinimumHeight(int(self.height*0.05))
+		self.label15 = QLabel(self)
+		self.search_layout.addWidget(self.label15)
+		self.label15.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label15.setMinimumHeight(int(self.height*0.05))
 
 		#Hour Layout
 		self.hour_layout = QHBoxLayout()
-		self.label12.setLayout(self.hour_layout)
+		self.label15.setLayout(self.hour_layout)
 		self.hour_layout.setContentsMargins(3, 0, 3, 0)
 
 		#Hour Title
-		self.label13 = QLabel(self)
-		self.label13.setText('Hour: ')
-		self.label13.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.hour_layout.addWidget(self.label13)
+		self.label16 = QLabel(self)
+		self.label16.setText('Hour: ')
+		self.label16.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.hour_layout.addWidget(self.label16)
 
 		#Checkboxes
 		self.check3 = QCheckBox('OVER')
@@ -363,41 +392,41 @@ class ModifyWindow(QWidget):
 
 
 		#Warnings Label
-		self.label14 = QLabel(self)
-		self.search_layout.addWidget(self.label14, alignment = Qt.AlignBottom)
-		self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT)
-		self.label14.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-		self.label14.setMinimumHeight(int(self.height*0.05))
-		self.label14.setAlignment(Qt.AlignVCenter | Qt.AlignHCenter)
+		self.label17 = QLabel(self)
+		self.search_layout.addWidget(self.label17, alignment = Qt.AlignBottom)
+		self.label17.setStyleSheet(self._TEXT_LABEL_LAYOUT)
+		self.label17.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label17.setMinimumHeight(int(self.height*0.05))
+		self.label17.setAlignment(Qt.AlignVCenter | Qt.AlignHCenter)
 
 
 		#Filter Control Buttons
-		self.label15 = QLabel(self)
-		self.label15.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-		self.label15.setMinimumHeight(int(self.height*0.05))
-		self.right_layout.addWidget(self.label15)
+		self.label18 = QLabel(self)
+		self.label18.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+		self.label18.setMinimumHeight(int(self.height*0.05))
+		self.right_layout.addWidget(self.label18)
 
 		#Layout for Control Buttons
 		self.filter_control_layout = QHBoxLayout()
-		self.label15.setLayout(self.filter_control_layout)
+		self.label18.setLayout(self.filter_control_layout)
 		self.filter_control_layout.setContentsMargins(0, 0, 0, 0)
 
 
 		#Search Button
-		self.button2 = QPushButton('SEARCH', self)
-		self.filter_control_layout.addWidget(self.button2)
-		self.button2.setToolTip('Press to apply current filter')
-		self.button2.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-		self.button2.setStyleSheet(self._BUTTON_LAYOUT)
-		self.button2.clicked.connect(self.on_click2)
+		self.button4 = QPushButton('SEARCH', self)
+		self.filter_control_layout.addWidget(self.button4)
+		self.button4.setToolTip('Press to apply current filter')
+		self.button4.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+		self.button4.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button4.clicked.connect(self.on_click4)
 
 		#Clear
-		self.button3 = QPushButton('CLEAR', self)
-		self.filter_control_layout.addWidget(self.button3)
-		self.button3.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-		self.button3.setToolTip('Press to clear filters')
-		self.button3.setStyleSheet(self._BUTTON_LAYOUT)
-		self.button3.clicked.connect(self.on_click3)
+		self.button5 = QPushButton('CLEAR', self)
+		self.filter_control_layout.addWidget(self.button5)
+		self.button5.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+		self.button5.setToolTip('Press to clear filters')
+		self.button5.setStyleSheet(self._BUTTON_LAYOUT)
+		self.button5.clicked.connect(self.on_click5)
 
 		self.show()
 
@@ -413,15 +442,20 @@ class ModifyWindow(QWidget):
 		self.data.deleteRow(index, data)
 		self.updateLog()
 
+	def on_click2(self):
+		pass
 
-	def on_click2(self): #Search
+	def on_click3(self):
+		pass
+
+	def on_click4(self): #Search
 		if self.dateto.date() > QDate(self.now):
-			self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
-			self.label14.setText('DATE TO CANNOT BE AFTER TODAY')
+			self.label17.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
+			self.label17.setText('DATE TO CANNOT BE AFTER TODAY')
 			return
 		if self.datefrom.date() > self.dateto.date():
-			self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
-			self.label14.setText('DATE BEFORE CANNOT BE AFTER DATE TO')
+			self.label17.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
+			self.label17.setText('DATE BEFORE CANNOT BE AFTER DATE TO')
 			return
 
 
@@ -461,7 +495,7 @@ class ModifyWindow(QWidget):
 		self.table_model = ModifyTable(data)
 		self.log.setModel(self.table_model)
 
-	def on_click3(self): #Clear
+	def on_click5(self): #Clear
 		self.datefrom.setDate(QDate((self.now - timedelta(30)).year, (self.now - timedelta(30)).month, (self.now - timedelta(30)).day))
 		self.dateto.setDate(QDate(self.now.year, self.now.month, self.now.day))
 		self.combobox.setCurrentText('')

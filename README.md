@@ -46,7 +46,7 @@
 		- ~~Add deletion of rows~~
 
 
-Horas Extras
+Extras Horas 
 Horas Extras Diferenciado 100%
 Atrasos
 Adicional Noturno

@@ -52,29 +52,3 @@ class VideoGet():
 		#Get rid of stream object
 		self.stop()
 		self.stream.release()
-
-
-class VideoShow():
-	def __init__(self, frame = None):
-		#Initialize frame and stopped
-		self.frame = frame
-		self.stopped = False
-
-	def start(self):
-		#Initialize thread for display of frames
-		threading.Thread(target=self.show, args=()).start()
-		return self
-
-	def show(self):
-		#Keep showing frames until asked to stop
-		while not self.stopped:
-			cv2.imshow('Train Track Detection', self.frame)
-			if cv2.waitKey(1) == ord('q'): #If q is pressed, stop program.
-				self.stopped = True
-
-	def stop(self):
-		#Set stop indicator to true
-		self.stopped = True
-
-if __name__ == '__main__':
-	pass
