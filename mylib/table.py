@@ -19,6 +19,7 @@ _PATH = os.path.dirname(os.path.dirname(__file__))
 with open(os.path.join(_PATH,'config.json'),'r') as f:
 		CONFIG = json.load(f)
 
+#Table for Main Window
 class MyTable(QTableView):
 	def __init__(self, model, parent = None):
 		super(MyTable, self).__init__(parent)
@@ -47,6 +48,7 @@ class MyTable(QTableView):
 		# 	self.setRowHeight(i, height/CONFIG['UI']['LOG_LENGTH'])
 
 
+#Table Model for Main Window
 class Table(QAbstractTableModel):
 	invalidEntry = pyqtSignal(QModelIndex, str)
 	validEntry = pyqtSignal(QModelIndex, str)
@@ -123,7 +125,7 @@ class Table(QAbstractTableModel):
 		elif index.column() == 4 and re.fullmatch(r'\d{2}:\d{2}:\d{2}', value):
 			return value
 
-
+#Table for Modify Window
 class ModifyMyTable(QTableView):
 	def __init__(self, model, parent = None):
 		super(ModifyMyTable, self).__init__(parent)
@@ -159,6 +161,7 @@ class ModifyMyTable(QTableView):
 		# for i in range(CONFIG['UI']['LOG_LENGTH']):
 		# 	self.setRowHeight(i, height/CONFIG['UI']['LOG_LENGTH'])
 
+#Table Model for Modify Window
 class ModifyTable(QAbstractTableModel):
 	invalidEntry = pyqtSignal(QModelIndex, str)
 	validEntry = pyqtSignal(QModelIndex, str)

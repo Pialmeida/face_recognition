@@ -14,6 +14,7 @@ _PATH = os.path.dirname(os.path.dirname(__file__))
 with open(os.path.join(_PATH,'config.json'),'r') as f:
 	CONFIG = json.load(f)
 
+#Main Class to recognize frames
 class Camera():
 	def __init__(self, _all = True):
 		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
@@ -23,6 +24,7 @@ class Camera():
 		if _all:
 			self.load_encodings(_all)
 
+	#Load images to allow classification.
 	def load_encodings(self, _all):
 		if _all == True:
 			self.known_face_names = [re.search(r'known_people\\([A-Za-z\- ]+)\_{1,2}\d+\.jpg', os.path.join(self._PATH_TO_PICS,x)).group(1) for x in os.listdir(self._PATH_TO_PICS) if x.endswith(r'.jpg')]

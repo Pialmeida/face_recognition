@@ -473,7 +473,7 @@ class MainWindow(QWidget):
 		self.button7.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 		self.button7.clicked.connect(self.on_click7)
 
-
+		#Show the UI (Must be last thing)
 		self.show() 
 
 	#View Registered Names

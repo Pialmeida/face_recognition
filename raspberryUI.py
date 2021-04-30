@@ -27,10 +27,13 @@ from mylib.thread import VideoGet
 with open('config.json','r') as f:
 	CONFIG = json.load(f)
 
+#Thread to Display Camera Live Feed
 class Thread(QThread):
+	#Create qtSignals to change image.
 	changePixmap = pyqtSignal(QImage)
 	matchFound = pyqtSignal(list)
 
+	#Main function to retrieve webcam data and display it
 	def run(self):
 		self.recognize = True
 		self.cap = VideoGet().start()
@@ -49,6 +52,7 @@ class Thread(QThread):
 				if len(names) != 0:
 					self.matchFound.emit(names)
 
+#Main window Class
 class MainWindow(QWidget):
 	def __init__(self):
 		super(MainWindow,self).__init__()

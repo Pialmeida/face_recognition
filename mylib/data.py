@@ -34,6 +34,7 @@ class Data():
 		except TypeError:
 			self.count = 1
 
+	#Add Entry to Database
 	def addEntry(self, name, now=datetime.now()):
 		today = now.strftime("%d/%m/%Y")
 
@@ -71,6 +72,7 @@ class Data():
 		else:
 			return 'REGISTRO COMPLETO'
 	
+	#Remove last entry in case of misidentification
 	def removeLast(self, name, now=datetime.now()):
 		if name is None:
 			return
@@ -100,17 +102,22 @@ class Data():
 
 		print(f'\n\n\n{name} rolled back!\n\n\n')
 
+	#Get full database
 	def getDF(self):
 		return pd.read_sql_query(r"SELECT * FROM log", self.conn)
 
+	#Get all names from database
 	def getNames(self):
 		return pd.read_sql_query(f'''
 			SELECT DISTINCT NOME FROM log
 		''', self.conn)
 
+	#Get database with current confiig options.
 	def getLog(self, _filter={}, raw = False, modify = False):
-		return pd.read_sql_query(self.generateQuery(_filter, raw = raw, modify = modify), self.conn)
+		query = self.generateQuery(_filter, raw = raw, modify = modify)
+		return pd.read_sql_query(query, self.conn)
 
+	#Returns Time Delta as String
 	def generateTimeDeltaAsStringOvertime(self,date1,date2):
 		date1 = datetime.strptime(date1,r'%H:%M:%S')
 		date2 = datetime.strptime(date2,r'%H:%M:%S')
@@ -312,9 +319,11 @@ class Data():
 			return query
 
 
+	#Retrieve data points
 	def data(self, row, column):
 		return self._data.iloc[row, column]
 
+	#Get names missing entries
 	def getMissing(self,date):
 		missing_entry_names = set([x[0] for x in self.cursor.execute(f"SELECT [NOME] FROM log WHERE STATUS = 'IN' AND DIA = '{date}'").fetchall()])
 		
@@ -324,17 +333,20 @@ class Data():
 
 		print(email_list)
 
-
+	#Add lunch time if user didn't record entry at the end of the day
 	def addLunchTime(self,date):
 		self.cursor.execute(f"UPDATE log SET [ENTRADA ALMOCO] = '{self._LUNCH_START}', [SAIDA ALMOCO] = '{self._LUNCH_END}', [HORAS TRABALHADAS] = TIME((strftime('%s', [SAIDA]) - strftime('%s', [ENTRADA]))-(strftime('%s', '{self._LUNCH_END}') - strftime('%s', '{self._LUNCH_START}')),'unixepoch') WHERE DIA = '{date}' AND [ENTRADA ALMOCO] IS NULL AND [SAIDA ALMOCO] IS NULL AND [ENTRADA] IS NOT NULL AND [SAIDA] IS NOT NULL")
 		self.conn.commit()
 
+	#Get end day string
 	def endDay(self):
 		return self.generateTimeDeltaAsString(self.generateTimeDelta(self._DAY_END, self._DAY_START),self.generateTimeDelta(self._LUNCH_START, self._LUNCH_END))
 
+	#Export to excel
 	def toExcel(self, path, _filter, raw):
 		self.getLog(_filter, raw = raw).to_excel(path, index=False)
 
+	#Modify Data by matching all other columns (only one value is changed.)
 	def modifyData(self, index, value, data):
 		if index.column() == 1:
 			out = f"SET [NOME] = '{value}'"
@@ -379,7 +391,7 @@ class Data():
 
 		try:
 			hours = {self.generateTimeDeltaAsString(self.generateTimeDelta(data[4],data[5]),self.generateTimeDeltaAsString(data[6],data[7]))}
-		except Exception as e:
+		except Exception:
 			hours = {self.generateTimeDelta(data[4],data[5])}
 
 
@@ -394,6 +406,7 @@ class Data():
 		self.conn.commit()
 
 
+	#Delete a row from log
 	def deleteRow(self, index, data):
 		#Change None Values to Null
 		conditions = []
@@ -416,6 +429,7 @@ class Data():
 		self.cursor.execute(query)
 		self.conn.commit()
 
+	#Close connection
 	def close(self):
 		self.conn.close()
 
