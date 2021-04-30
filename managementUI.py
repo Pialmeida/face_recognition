@@ -25,10 +25,12 @@ with open('config.json','r') as f:
 class MainWindow(QWidget):
 	def __init__(self):
 		super(MainWindow,self).__init__()
+		#Set Window Properties
 		self.title = 'Identificação Biométrica'
 		self.width = CONFIG['UI']['UI_WIDTH']
 		self.height = CONFIG['UI']['UI_HEIGHT']
 
+		#Define paths to files
 		self._PATH_TO_LOGO = os.path.join(os.path.dirname(__file__),'logoAKAER.jpg')
 
 		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
@@ -37,6 +39,8 @@ class MainWindow(QWidget):
 
 		self._PATH_TO_ERROR_MP3 = os.path.join(os.path.dirname(__file__),'audio','error.mp3')
 
+
+		#Define Style Guide for Widgets
 		self._MAIN_WINDOW_LAYOUT = '''
 			background-color: #c5c6c7;
 		'''
@@ -116,24 +120,31 @@ class MainWindow(QWidget):
 			}
 		'''
 
+		#Set value for current date
 		self.now = datetime.now()
 
+		#Initialize empty filter
 		self.filter = {}
 
+		#Initialize prev_name
 		self.prev_name = None
 
+		#Get Link to Database Management Class
 		self.data = Data()
 
+		#Remove any temp pics created that were not properly deleted
 		self.removeTempPics()
 
+		#Call main method to setup UI
 		self.setupUI()
 
 	def setupUI(self):
+		#Define Main Window Properties
 		self.setStyleSheet(self._MAIN_WINDOW_LAYOUT)
 		self.setWindowTitle(self.title)
 		self.setFixedSize(self.width, self.height)
 
-		#Define Main Layout
+		#Define Main Layout   
 		self.layout = QHBoxLayout()
 		self.layout.setContentsMargins(5,5,5,5)
 		self.setLayout(self.layout)
@@ -475,17 +486,20 @@ class MainWindow(QWidget):
 		[self.listwidget.addItem(x) for x in sorted(set([re.search('([A-Za-z\- ]+)\_{1,2}\d+\.jpg', file).group(1) for file in os.listdir(self._PATH_TO_PICS)]))]
 
 
-	#Register Button
+	#Register Button Functionality
 	def on_click1(self):
 		self.registerWindow = RegisterWindow()
 		self.registerWindow.killWindow.connect(self._del_register_window)
 		self.registerWindow.name_entered.connect(self.renameTempFiles)
 		self.registerWindow.show()
 
+	#Close Register Window Properly
 	def _del_register_window(self):
 		self.registerWindow.monitor.cap.close()
 		self.registerWindow.close()
 
+
+	#Rename the temp files to the person's name
 	@pyqtSlot(str, bool)
 	def renameTempFiles(self, name, email):
 		name = name.upper()
@@ -506,9 +520,11 @@ class MainWindow(QWidget):
 		self.nameEntry.nameEntered.connect(self._name_entered)
 		self.nameEntry.show()
 
+	#Close Remove Window Properly
 	def _del_name_entry(self):
 		self.nameEntry.close()
 
+	#Delete Pictures from Registration
 	@pyqtSlot(str)
 	def _name_entered(self, name):
 		for file in os.listdir(self._PATH_TO_PICS):
@@ -559,6 +575,7 @@ class MainWindow(QWidget):
 
 		self.updateLog()
 
+	#Method to Update Log
 	def updateLog(self):
 		self.combobox.clear()
 		self.combobox.addItem('')
@@ -583,6 +600,7 @@ class MainWindow(QWidget):
 		self.modifyWindow.killWindow.connect(self._del_modify_window)
 		self.modifyWindow.show()
 
+	#Close The Modify Window Property
 	def _del_modify_window(self):
 		self.modifyWindow.close()
 		self.updateLog()
@@ -609,8 +627,8 @@ class MainWindow(QWidget):
 		_filter['date'] = self.getMonthlyDate()
 		self.data.toExcel(path, _filter, 'month')
 
-
-	def getMonthlyDate(self, d = datetime.now()): #Get Monthly Report Date
+	#Generate Monthly Date for Report
+	def getMonthlyDate(self, d = datetime.now()):
 		if d.day <= 20:
 			if d.month == 1:
 				year_b1 = d.year - 1
@@ -641,23 +659,27 @@ class MainWindow(QWidget):
 				month_b2 = d.month
 			return [datetime(year_b1, month_b1, CONFIG['REPORT']['END']).strftime("%Y/%m/%d"), datetime(year_b2, month_b2, CONFIG['REPORT']['START']).strftime("%Y/%m/%d")]
 
-	#Keep this function here
+	#Keep this function here. It overrides a on_data_change method of QWidget
 	def on_data_change(self, i1, i2):
 		pass
 
+	#Warn user if invalid change
 	def invalidChange(self, index, value):
 		self.label14.setStyleSheet(self._TEXT_LABEL_LAYOUT_DENY)
 		self.label14.setText(f'Error at {index.row()} {index.column()}')
 
+	#Warn user if change is valid
 	def validChange(self, index, value):
 		self.label14.setText('')
 
+	#Remove temporary pictures
 	def removeTempPics(self):
 		for file in os.listdir(self._PATH_TO_PICS):
 			if file.startswith('temp'):
 				path = os.path.join(self._PATH_TO_PICS, file)
 				os.remove(path)
 
+	#Close Main Window Property
 	def closeEvent(self, event):
 		self.removeTempPics()
 		self.data.close()

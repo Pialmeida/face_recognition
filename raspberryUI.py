@@ -52,10 +52,13 @@ class Thread(QThread):
 class MainWindow(QWidget):
 	def __init__(self):
 		super(MainWindow,self).__init__()
+
+		#Initialize Window Properties
 		self.title = 'Face Detection Detection'
 		self.width = CONFIG['UI']['UI_WIDTH']
 		self.height = CONFIG['UI']['UI_HEIGHT']
 
+		#Define path to files
 		self._PATH_TO_LOGO = os.path.join(os.path.dirname(__file__),'logoAKAER.jpg')
 
 		self._PATH_TO_PICS = CONFIG['PATH']['PICS']
@@ -64,6 +67,7 @@ class MainWindow(QWidget):
 
 		self._PATH_TO_ERROR_MP3 = os.path.join(os.path.dirname(__file__),'audio','error.mp3')
 
+		#Define Widget Style Sheets
 		self._MAIN_WINDOW_LAYOUT = '''
 			background-color: #c5c6c7;
 		'''
@@ -92,19 +96,26 @@ class MainWindow(QWidget):
 			}
 		'''
 
+		#Function to setup GPIO Sensor
 		#self.setupSensor()
 
+		#Debug Counter
 		self._timer_counter = 0
 
+		#Date Today
 		self.now = datetime.now()
 
+		#Initialize previous name
 		self.prev_name = None
 
+		#Define connection to database
 		self.data = Data()
 
+		#Main method to setup UI
 		self.setupUI()
 
 	def setupUI(self):
+		#Define Main Window Properties
 		self.setStyleSheet(self._MAIN_WINDOW_LAYOUT)
 		self.setWindowTitle(self.title)
 		self.setFixedSize(self.width, self.height)
@@ -268,20 +279,23 @@ class MainWindow(QWidget):
 	# 	self.timer4.start(CONFIG['SENSOR']['INTERVAL']*1000)
 
 
+	#Remove latest Entry
 	def on_click1(self):
 		self.data.removeLast(self._prev_name)
 		self._prev_name = None
 		self.button.setText('NÃO É VOCÊ?')
 
+	#Call function when day ends
 	def alertUser(self):
 		if datetime.now().day != self.now.day:
 			self.data.endDay()
 
+	#Set live image video to Main Window
 	@pyqtSlot(QImage)
 	def setImage(self, image):
 		self.label.setPixmap(QPixmap.fromImage(image))
 
-
+	#Record entry in database
 	@pyqtSlot(list)
 	def recordEntry(self, names):
 		self.monitor.recognize = False
@@ -289,18 +303,21 @@ class MainWindow(QWidget):
 
 		self.timer.start(CONFIG['DETECTION']['INTERVAL']*1000)
 
-
+		#Check names recognized in frame
 		if len(names) > 1:
+			#Display error if 2 people on frame
 			self.button.setText('ERRO: 2 PESSOAS DETECTADAS')
 			playsound(self._PATH_TO_ERROR_MP3)
 		elif 'Unknown' in names:
+			#Display error if recognition fails
 			print('Unknown Person Identified')
 			playsound(self._PATH_TO_ERROR_MP3)
 		else:
+			#If recognition does not fail, check if 
 			if self.prev_name is None or names[0] != self.prev_name:
 				playsound(self._PATH_TO_CONFIRMATION_MP3)
 
-				#Start timer for recognition
+				#Start timer for recognition reset (5 second cooldown between trying to recognize)
 				self.timer2.start(CONFIG['DETECTION']['RESET_PREV']*1000)
 
 				self.prev_name = names[0]
@@ -328,15 +345,18 @@ class MainWindow(QWidget):
 			else:
 				print('Name already recorded')
 
+	#Restart recognition 
 	def restartRecognize(self):
 		print('ENDING TIMER')
 		self.monitor.recognize = True
 
+	#Make recognition of same person possible again
 	def resetPrevName(self):
 		print('PREV NAME RESET')
 		self.button.setText('NÃO É VOCÊ?')
 		self.prev_name = None
 
+	#Close all classes properly
 	def closeEvent(self, closeEvent):
 		self.monitor.cap.close()
 		self.monitor.terminate()

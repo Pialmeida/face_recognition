@@ -37,12 +37,15 @@ class ModifyWindow(QWidget):
 	def __init__(self):
 		super(ModifyWindow, self).__init__()
 
+		#Main Window Properties
 		self.title = 'Database Modification'
 		self.width = CONFIG['DATA_MODIFICATION']['UI_WIDTH']
 		self.height = CONFIG['DATA_MODIFICATION']['UI_HEIGHT']
 
+		#Define path to main files
 		self._PATH_TO_DB = CONFIG['PATH']['DATA']
 
+		#Define layout for widgets
 		self._MAIN_WINDOW_LAYOUT = '''
 			background-color: #c5c6c7;
 		'''
